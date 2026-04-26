@@ -1,26 +1,27 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ArrowLeft, X, Download, Star, Film, Mic2, Info, ChevronRight } from 'lucide-react';
+import { Heart, ArrowLeft, Star, Film, Mic2, Info, ChevronRight, Download } from 'lucide-react';
 import { fetchCached } from '../utils/cache';
 import SEO from '../components/SEO';
 import GalleryModal from '../components/GalleryModal';
 
 // ─── Character Skeleton ──────────────────────────────────────────────
 function CharacterSkeleton() {
+  const itemStyle = { border: '1px solid var(--border-subtle)' };
   return (
-    <div style={{ paddingBottom: 60 }} className="skeleton">
-      <div style={{ width: 100, height: 20, background: 'var(--bg-surface)', marginBottom: 32, borderRadius: 4 }} />
+    <div className="page-container" style={{ paddingBottom: 60 }}>
+      <div className="skeleton" style={{ width: 100, height: 20, marginBottom: 32, borderRadius: 4, ...itemStyle }} />
       <div className="details-layout">
         <div className="details-left">
-          <div style={{ width: '100%', aspectRatio: '2/3', background: 'var(--bg-surface)', borderRadius: 16 }} />
-          <div style={{ height: 120, background: 'var(--bg-surface)', marginTop: 24, borderRadius: 12 }} />
+          <div className="skeleton" style={{ width: '100%', aspectRatio: '2/3', borderRadius: 16, ...itemStyle }} />
+          <div className="skeleton" style={{ height: 120, marginTop: 24, borderRadius: 12, ...itemStyle }} />
         </div>
         <div style={{ flex: 1, minWidth: 'min(100%, 320px)' }}>
-          <div style={{ width: '60%', height: 48, background: 'var(--bg-surface)', marginBottom: 12, borderRadius: 8 }} />
-          <div style={{ width: '30%', height: 24, background: 'var(--bg-surface)', marginBottom: 40, borderRadius: 4 }} />
-          <div style={{ height: 200, background: 'var(--bg-surface)', marginBottom: 48, borderRadius: 12 }} />
-          <div style={{ height: 400, background: 'var(--bg-surface)', borderRadius: 12 }} />
+          <div className="skeleton" style={{ width: '60%', height: 48, marginBottom: 12, borderRadius: 8, ...itemStyle }} />
+          <div className="skeleton" style={{ width: '30%', height: 24, marginBottom: 40, borderRadius: 4, ...itemStyle }} />
+          <div className="skeleton" style={{ height: 200, marginBottom: 48, borderRadius: 12, ...itemStyle }} />
+          <div className="skeleton" style={{ height: 400, borderRadius: 12, ...itemStyle }} />
         </div>
       </div>
     </div>
@@ -29,6 +30,7 @@ function CharacterSkeleton() {
 
 export default function CharacterDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [pictures, setPictures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,54 +75,39 @@ export default function CharacterDetails() {
     return data.voices.filter(v => v.language === activeLang);
   }, [data, activeLang]);
 
-  const downloadImage = (url, filename) => {
-    fetch(url)
-      .then(response => response.blob())
-      .then(blob => {
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-      })
-      .catch(() => window.open(url, '_blank'));
-  };
+
+  const seoSchema = useMemo(() => data ? {
+    "@context": "https://schema.org",
+    "@type": "Thing",
+    "name": data.name,
+    "description": data.about,
+    "image": data.images?.jpg?.image_url
+  } : null, [data]);
 
   if (loading) return <CharacterSkeleton />;
   if (!data) return <div className="text-center" style={{ marginTop: 100, color: '#ef4444' }}>Character not found.</div>;
 
   return (
-    <div style={{ paddingBottom: 60 }}>
+    <div className="page-container" style={{ paddingBottom: 60 }}>
       <SEO 
         title={data ? data.name : 'Loading...'} 
         description={data?.about?.slice(0, 160)}
         image={data?.images?.jpg?.image_url}
         url={`/character/${id}`}
         type="profile"
-        schema={data ? {
-          "@context": "https://schema.org",
-          "@type": "Thing",
-          "name": data.name,
-          "description": data.about,
-          "image": data.images?.jpg?.image_url
-        } : null}
+        schema={seoSchema}
       />
-      <style>
-        {`
-          .va-tab { transition: all 0.2s; border-bottom: 2px solid transparent; }
-          .va-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-          .anime-list::-webkit-scrollbar { width: 4px; }
-          .anime-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
-        `}
-      </style>
 
       {/* Back Navigation */}
-      <Link to={-1} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 32, fontSize: 14, fontWeight: 600 }} className="hover-primary">
+      <button
+        onClick={() => navigate(-1)}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 8,
+          color: 'var(--text-tertiary)', background: 'none', border: 'none',
+          cursor: 'pointer', marginBottom: 32, fontSize: 14, fontWeight: 600,
+          padding: 0, fontFamily: 'inherit' }}
+      >
         <ArrowLeft size={16} /> Back
-      </Link>
+      </button>
 
       <div className="details-layout">
         
@@ -168,10 +155,10 @@ export default function CharacterDetails() {
         <div style={{ flex: 1, minWidth: 320 }}>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 style={{ fontSize: 44, fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>{data.name}</h1>
-                <h2 style={{ fontSize: 18, color: 'var(--text-muted)', fontWeight: 400, marginBottom: 32 }}>{data.name_kanji}</h2>
+                <h2 style={{ fontSize: 18, color: 'var(--text-tertiary)', fontWeight: 400, marginBottom: 32 }}>{data.name_kanji}</h2>
 
                 <h3 className="section-title">Biography</h3>
-                <p style={{ lineHeight: 1.8, color: 'var(--text-main)', fontSize: 16, marginBottom: 48, whiteSpace: 'pre-line' }}>
+                <p style={{ lineHeight: 1.8, color: 'var(--text-secondary)', fontSize: 16, marginBottom: 48, whiteSpace: 'pre-line' }}>
                     {data.about || "No biography available."}
                 </p>
 
@@ -181,7 +168,7 @@ export default function CharacterDetails() {
                     <div className="card" style={{ padding: 2, background: 'var(--bg-surface)' }}>
                         <div className="anime-list" style={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 480, overflowY: 'auto' }}>
                             {data.anime?.map((item, idx) => (
-                                <Link key={idx} to={`/anime/${item.anime.mal_id}`}
+                                <Link key={item.anime.mal_id} to={`/anime/${item.anime.mal_id}`}
                                     style={{ 
                                         textDecoration: 'none', 
                                         display: 'flex', 
@@ -231,8 +218,8 @@ export default function CharacterDetails() {
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-                            {filteredVoices.map((v, idx) => (
-                                <div key={idx} className="card" style={{ display: 'flex', gap: 14, padding: 12, alignItems: 'center' }}>
+                            {filteredVoices.map((v) => (
+                                <div key={v.person.mal_id} className="card" style={{ display: 'flex', gap: 14, padding: 12, alignItems: 'center' }}>
                                     <img src={v.person.images?.jpg?.image_url} alt={v.person.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--border-subtle)' }} />
                                     <div style={{ minWidth: 0, flex: 1 }}>
                                         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.person.name}</div>

@@ -24,7 +24,7 @@ export async function fetchCached(url, cacheKey) {
   for (let i = 0; i < 4; i++) {
     const res = await fetch(url);
     if (res.status === 429) {
-      await new Promise(r => setTimeout(r, delayMs));
+      await new Promise(r => setTimeout(r, delayMs + Math.random() * 400));
       delayMs *= 2;
       continue;
     }

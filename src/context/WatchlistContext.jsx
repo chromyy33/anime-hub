@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { CheckCircle2, Trash2, LayoutGrid } from 'lucide-react';
 
@@ -33,9 +33,7 @@ export function WatchlistProvider({ children }) {
   }, []);
 
   const removeFromList = useCallback((malId) => {
-    let title = 'Anime';
     setWatchlist(prev => {
-      title = prev[malId]?.title || 'Anime';
       const next = { ...prev };
       delete next[malId];
       try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
@@ -67,9 +65,17 @@ export function WatchlistProvider({ children }) {
     });
   }, []);
 
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === LS_KEY) setWatchlist(JSON.parse(e.newValue) || {});
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
   const getEntry = useCallback((malId) => watchlist[malId] || null, [watchlist]);
   const isInList = useCallback((malId) => !!watchlist[malId], [watchlist]);
-  const allEntries = Object.values(watchlist);
+  const allEntries = useMemo(() => Object.values(watchlist), [watchlist]);
 
   return (
     <WatchlistContext.Provider value={{ watchlist, allEntries, addToList, removeFromList, setStatus, setUserRating, getEntry, isInList }}>

@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="footer-brand">
           <Link to="/" className="footer-logo" style={{ textDecoration: 'none' }}>
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Sparkles size={18} color="#fff" fill="#fff" />
+              <Sparkles size={18} color="#fff" fill="#fff" aria-hidden="true" />
             </div>
             ANI<span style={{ color: 'var(--primary)' }}>DOC</span>
           </Link>
@@ -37,7 +37,7 @@ export default function Footer() {
           <h4 className="footer-section-title">Credits</h4>
           <div className="credit-item">
             <span>Made with</span>
-            <Heart size={14} fill="#ef4444" color="#ef4444" />
+            <Heart size={14} fill="#ef4444" color="#ef4444" aria-hidden="true" />
             <span>by</span>
             <a 
               href="https://github.com/chromyy33" 
@@ -46,19 +46,19 @@ export default function Footer() {
               className="footer-link"
               style={{ fontWeight: 700, color: 'var(--text-primary)' }}
             >
-              chromyy33 <ExternalLink size={12} style={{ opacity: 0.5 }} />
+              chromyy33 <ExternalLink size={12} style={{ opacity: 0.5 }} aria-hidden="true" />
             </a>
           </div>
           <div className="credit-item">
             <span>Co-coded with</span>
             <a 
-              href="https://github.com/antigravity" 
+              href="https://antigravity.google/" 
               target="_blank" 
               rel="noreferrer"
               className="footer-link"
               style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4 }}
             >
-              <Terminal size={12} /> ANTIGRAVITY
+              <Terminal size={12} aria-hidden="true" /> ANTIGRAVITY
             </a>
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.6 }}>

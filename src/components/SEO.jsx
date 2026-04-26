@@ -40,10 +40,10 @@ export default function SEO({
     updateMeta('meta[property="og:type"]', type);
 
     // Twitter
-    updateMeta('meta[property="twitter:title"]', fullTitle);
-    updateMeta('meta[property="twitter:description"]', description);
-    updateMeta('meta[property="twitter:image"]', image || defaultImage);
-    updateMeta('meta[property="twitter:url"]', currentUrl);
+    updateMeta('meta[name="twitter:title"]', fullTitle);
+    updateMeta('meta[name="twitter:description"]', description);
+    updateMeta('meta[name="twitter:image"]', image || defaultImage);
+    updateMeta('meta[name="twitter:url"]', currentUrl);
 
     // 3. JSON-LD Schema
     const existingSchema = document.getElementById('json-ld-schema');
@@ -56,6 +56,15 @@ export default function SEO({
       script.text = JSON.stringify(schema);
       document.head.appendChild(script);
     }
+
+    // 4. Canonical Link
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', currentUrl);
 
   }, [title, description, image, url, type, schema]);
 

@@ -12,8 +12,10 @@ export default function GenrePage() {
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setError(null);
     setLoading(true);
     fetch(`https://api.jikan.moe/v4/anime?genres=${id}&order_by=score&sort=desc&limit=24&page=${page}`)
       .then(r => r.json())
@@ -23,7 +25,7 @@ export default function GenrePage() {
         setLoading(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setError('Failed to load results.'); setLoading(false); });
   }, [id, page]);
 
   const goToPage = (p) => {
@@ -34,7 +36,7 @@ export default function GenrePage() {
     <div style={{ paddingBottom: 60 }}>
       <SEO 
         title={`${name.replace(/-/g, ' ')} Anime`} 
-        description={`Explore the best ${name.replace(/-/g, ' ')} anime on AniDoc. Top rated and trending titles in the ${name} genre.`}
+        description={`Explore the best ${name.replace(/-/g, ' ')} anime on AniDoc. Top rated and trending titles in the ${name.replace(/-/g, ' ')} genre.`}
         url={`/genre/${id}/${name}`}
       />
       {/* Header */}
@@ -52,8 +54,15 @@ export default function GenrePage() {
         </div>
       </div>
  
+      {error && (
+        <div style={{ textAlign: 'center', padding: '60px 0', 
+          color: '#ef4444', fontSize: 15 }}>
+          {error}
+        </div>
+      )}
+
       {/* Grid */}
-      {loading ? (
+      {!error && (loading ? (
         <div className="grid-list">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="card skeleton" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
@@ -71,12 +80,12 @@ export default function GenrePage() {
             <AnimeCard key={anime.mal_id} anime={anime} index={idx} />
           ))}
         </div>
-      )}
+      ))}
 
       {/* Pagination */}
       {pagination && pagination.last_visible_page > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 48 }}>
-          <button onClick={() => goToPage(page - 1)} disabled={page <= 1}
+          <button onClick={() => goToPage(page - 1)} disabled={page <= 1} aria-label="Previous page"
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', background: 'var(--bg-surface)', color: page <= 1 ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: page <= 1 ? 'not-allowed' : 'pointer', fontWeight: 500, fontSize: 14 }}>
             <ChevronLeft size={16} /> Prev
           </button>
@@ -90,14 +99,14 @@ export default function GenrePage() {
             return pages.map((p, i) => p === '...' ? (
               <span key={`e-${i}`} style={{ padding: '0 6px', color: 'var(--text-tertiary)', fontSize: 14 }}>…</span>
             ) : (
-              <button key={p} onClick={() => goToPage(p)}
+              <button key={p} onClick={() => goToPage(p)} aria-label={`Go to page ${p}`}
                 style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', border: '1px solid', borderColor: p === page ? 'var(--primary)' : 'var(--border-subtle)', background: p === page ? 'var(--primary)' : 'var(--bg-surface)', color: p === page ? '#fff' : 'var(--text-primary)', fontWeight: p === page ? 700 : 400, cursor: 'pointer', fontSize: 14, transition: 'all 0.15s' }}>
                 {p}
               </button>
             ));
           })()}
 
-          <button onClick={() => goToPage(page + 1)} disabled={!pagination.has_next_page}
+          <button onClick={() => goToPage(page + 1)} disabled={!pagination.has_next_page} aria-label="Next page"
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', background: 'var(--bg-surface)', color: !pagination.has_next_page ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: !pagination.has_next_page ? 'not-allowed' : 'pointer', fontWeight: 500, fontSize: 14 }}>
             Next <ChevronRight size={16} />
           </button>

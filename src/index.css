@@ -7,6 +7,8 @@
   /* Brand - Light Mode Default */
   --primary:        #059669;   /* Emerald 600 - Better contrast on light */
   --primary-hover:  #047857;   /* Emerald 700 */
+  --primary-dim:    rgba(5, 150, 105, 0.10);
+  --shadow-xl:      0 20px 40px -8px rgba(2, 8, 23, 0.18);
   /* ── LIGHT THEME — Glassmorphic ── */
   --bg-base:          #f8fafc;   /* slate-50 — page canvas */
   --bg-surface:       rgba(255, 255, 255, 0.52);  /* Brighter, more translucent */
@@ -94,6 +96,8 @@
   --text-accent:    #10b981;   /* Emerald 500 */
   --primary:        #10b981;   /* Emerald 500 - Vibrant glow on dark */
   --primary-hover:  #34d399;   /* Emerald 400 */
+  --primary-dim:    rgba(16, 185, 129, 0.12);
+  --shadow-xl:      0 20px 40px -8px rgba(0, 0, 0, 0.55);
 
   --border-subtle:  #1e2029;   /* very subtle dividers */
   --border-strong:  #30363d;   /* card borders (sharper) */
@@ -2303,7 +2307,7 @@ input[type="range"]:active::-webkit-slider-thumb {
 
 .details-hero-subtitle {
   font-size: 18px;
-  color: var(--text-muted);
+  color: var(--text-tertiary);
   font-weight: 400;
   margin-bottom: 20px;
 }
@@ -2512,7 +2516,7 @@ input[type="range"]:active::-webkit-slider-thumb {
 }
 
 .filter-select-trigger:hover {
-  border-color: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .filter-select-trigger.active {
@@ -3381,4 +3385,21 @@ input[type="range"]:active::-webkit-slider-thumb {
 .pagination-btn {
   padding: 0.6em 1em;
   min-width: 2.5em;
+}
+
+/* Character Details Specific Styles */
+.va-tab { 
+  transition: all 0.2s; 
+  border-bottom: 2px solid transparent; 
+}
+.va-tab.active { 
+  color: var(--primary); 
+  border-bottom-color: var(--primary); 
+}
+.anime-list::-webkit-scrollbar { 
+  width: 4px; 
+}
+.anime-list::-webkit-scrollbar-thumb { 
+  background: var(--border-strong); 
+  border-radius: 10px; 
 }

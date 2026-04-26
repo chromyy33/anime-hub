@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Users, Heart, Trophy, Tv, Calendar, Clock, Film, ExternalLink, PlaySquare, ArrowUpRight, Download, X, Image as ImageIcon, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Star, Users, Heart, Trophy, Tv, Calendar, Clock, Film, ExternalLink, PlaySquare, ArrowUpRight, Download, Image as ImageIcon, ArrowRight, ArrowLeft } from 'lucide-react';
 import Carousel from '../components/Carousel';
 import SEO from '../components/SEO';
 import WatchlistButton from '../components/WatchlistButton';
@@ -28,6 +28,7 @@ function DetailsSkeleton() {
 
 export default function AnimeDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [anime, setAnime] = useState(null);
   const [characters, setCharacters] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -148,22 +149,23 @@ export default function AnimeDetails() {
       return short || rating;
   }
 
-  const downloadImage = async (url, filename) => {
-      try {
-          const response = await fetch(url);
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(blobUrl);
-      } catch (e) {
-          window.open(url, '_blank');
-      }
-  };
+
+  const seoSchema = useMemo(() => anime ? {
+    "@context": "https://schema.org",
+    "@type": anime.type === 'Movie' ? 'Movie' : 'TVSeries',
+    "name": anime.title_english || anime.title,
+    "alternateName": anime.title,
+    "description": anime.synopsis,
+    "image": anime.images?.jpg?.large_image_url,
+    "genre": anime.genres?.map(g => g.name),
+    "numberOfEpisodes": anime.episodes,
+    "aggregateRating": anime.score ? {
+      "@type": "AggregateRating",
+      "ratingValue": anime.score,
+      "bestRating": "10",
+      "ratingCount": anime.scored_by || 0
+    } : undefined
+  } : null, [anime]);
 
   if (loading) return <DetailsSkeleton />;
   if (error && !anime) return <div className="text-center" style={{marginTop: 100, color: '#ef4444'}}>{error}</div>;
@@ -176,28 +178,21 @@ export default function AnimeDetails() {
         image={anime?.images?.jpg?.large_image_url}
         url={`/anime/${id}`}
         type="video.tv_show"
-        schema={anime ? {
-          "@context": "https://schema.org",
-          "@type": anime.type === 'Movie' ? 'Movie' : 'TVSeries',
-          "name": anime.title_english || anime.title,
-          "alternateName": anime.title,
-          "description": anime.synopsis,
-          "image": anime.images?.jpg?.large_image_url,
-          "genre": anime.genres?.map(g => g.name),
-          "numberOfEpisodes": anime.episodes,
-          "aggregateRating": anime.score ? {
-            "@type": "AggregateRating",
-            "ratingValue": anime.score,
-            "bestRating": "10",
-            "ratingCount": anime.scored_by || 0
-          } : undefined
-        } : null}
+        schema={seoSchema}
       />
       
       {/* Back Navigation */}
-      <Link to={-1} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 16, fontSize: 14, fontWeight: 600, transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color='var(--primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-tertiary)'}>
+      <button 
+        onClick={() => navigate(-1)}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, 
+          color: 'var(--text-tertiary)', background: 'none', border: 'none',
+          cursor: 'pointer', marginBottom: 16, fontSize: 14, fontWeight: 600,
+          transition: 'color 0.2s', padding: 0, fontFamily: 'inherit' }}
+        onMouseOver={e => e.currentTarget.style.color='var(--primary)'}
+        onMouseOut={e => e.currentTarget.style.color='var(--text-tertiary)'}
+      >
         <ArrowLeft size={16} /> Back
-      </Link>
+      </button>
 
       {/* MOBILE HEADER: Shown only on mobile < 768px */}
       <div className="mobile-title-block">
@@ -349,8 +344,8 @@ export default function AnimeDetails() {
                               </div>
                               {/* Fixed height + styled scroll for large lists */}
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto', paddingRight: 4 }}>
-                                  {anime.theme.openings.map((op, idx) => (
-                                      <a key={idx} href={`https://www.youtube.com/results?search_query=${encodeURIComponent(anime.title + ' ' + op)}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: 'var(--text-primary)', textDecoration: 'none', display: 'flex', alignItems: 'flex-start', padding: 8, background: 'var(--bg-surface-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: 8, transition: 'border-color 0.2s', flexShrink: 0 }} onMouseOver={e=>e.currentTarget.style.borderColor='var(--primary)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border-subtle)'}>
+                                  {anime.theme.openings.map((op) => (
+                                      <a key={op} href={`https://www.youtube.com/results?search_query=${encodeURIComponent(anime.title + ' ' + op)}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: 'var(--text-primary)', textDecoration: 'none', display: 'flex', alignItems: 'flex-start', padding: 8, background: 'var(--bg-surface-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: 8, transition: 'border-color 0.2s', flexShrink: 0 }} onMouseOver={e=>e.currentTarget.style.borderColor='var(--primary)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border-subtle)'}>
                                           <PlaySquare size={15} color="var(--primary)" style={{marginTop: 1, flexShrink: 0}} />
                                           <span style={{flex: 1}}>{op}</span>
                                           <ArrowUpRight size={13} color="var(--text-tertiary)" style={{flexShrink: 0}} />
@@ -365,8 +360,8 @@ export default function AnimeDetails() {
                                 ENDINGS <span style={{ opacity: 0.6, fontWeight: 400 }}>({anime.theme.endings.length})</span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto', paddingRight: 4 }}>
-                                  {anime.theme.endings.map((ed, idx) => (
-                                      <a key={idx} href={`https://www.youtube.com/results?search_query=${encodeURIComponent(anime.title + ' ' + ed)}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: 'var(--text-primary)', textDecoration: 'none', display: 'flex', alignItems: 'flex-start', padding: 8, background: 'var(--bg-surface-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: 8, transition: 'border-color 0.2s', flexShrink: 0 }} onMouseOver={e=>e.currentTarget.style.borderColor='var(--primary)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border-subtle)'}>
+                                  {anime.theme.endings.map((ed) => (
+                                      <a key={ed} href={`https://www.youtube.com/results?search_query=${encodeURIComponent(anime.title + ' ' + ed)}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: 'var(--text-primary)', textDecoration: 'none', display: 'flex', alignItems: 'flex-start', padding: 8, background: 'var(--bg-surface-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: 8, transition: 'border-color 0.2s', flexShrink: 0 }} onMouseOver={e=>e.currentTarget.style.borderColor='var(--primary)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border-subtle)'}>
                                           <PlaySquare size={15} color="var(--primary)" style={{marginTop: 1, flexShrink: 0}} />
                                           <span style={{flex: 1}}>{ed}</span>
                                           <ArrowUpRight size={13} color="var(--text-tertiary)" style={{flexShrink: 0}} />
@@ -408,7 +403,7 @@ export default function AnimeDetails() {
             <h1 style={{ fontSize: 44, fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>
               {anime.title_english || anime.title}
             </h1>
-            <h2 style={{ fontSize: 18, color: 'var(--text-muted)', fontWeight: 400, marginBottom: 20 }}>
+            <h2 style={{ fontSize: 18, color: 'var(--text-tertiary)', fontWeight: 400, marginBottom: 20 }}>
               {anime.title_japanese}
             </h2>
             {/* Watchlist CTA */}
@@ -435,14 +430,14 @@ export default function AnimeDetails() {
 
           {/* Synopsis & Background */}
           <h3 className="section-title" style={{ fontSize: 22, margin: '0 0 16px 0' }}>Synopsis</h3>
-          <p style={{ lineHeight: 1.8, color: 'var(--text-main)', fontSize: 16, marginBottom: 40, whiteSpace: 'pre-line' }}>
+          <p style={{ lineHeight: 1.8, color: 'var(--text-secondary)', fontSize: 16, marginBottom: 40, whiteSpace: 'pre-line' }}>
             {anime.synopsis}
           </p>
 
           {anime.background && (
               <>
                   <h3 className="section-title" style={{ fontSize: 22, margin: '0 0 16px 0' }}>Background</h3>
-                  <p style={{ lineHeight: 1.8, color: 'var(--text-muted)', fontSize: 15, marginBottom: 40, whiteSpace: 'pre-line' }}>
+                  <p style={{ lineHeight: 1.8, color: 'var(--text-tertiary)', fontSize: 15, marginBottom: 40, whiteSpace: 'pre-line' }}>
                     {anime.background}
                   </p>
               </>
@@ -616,13 +611,13 @@ export default function AnimeDetails() {
                                   <img src={review.user.images.jpg.image_url} alt={review.user.username} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
                                   <div>
                                       <div style={{ fontWeight: 700, fontSize: 14 }}>{review.user.username}</div>
-                                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{new Date(review.date).toLocaleDateString()}</div>
+                                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{new Date(review.date).toLocaleDateString()}</div>
                                   </div>
                                   <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, color: '#ef4444', fontWeight: 700, fontSize: 14 }}>
                                       <Star size={14} fill="#ef4444" /> {review.score}
                                   </div>
                               </div>
-                              <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-main)', whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical' }}>
+                              <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)', whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical' }}>
                                   {review.review}
                               </p>
                           </div>

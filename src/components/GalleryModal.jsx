@@ -15,6 +15,12 @@ export default function GalleryModal({ show, onClose, images, title, filenamePre
       document.body.style.overflow = 'unset';
     };
   }, [show]);
+  
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    if (show) window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [show, onClose]);
 
   const downloadImage = async (url, filename) => {
     try {
@@ -45,6 +51,9 @@ export default function GalleryModal({ show, onClose, images, title, filenamePre
           transition={{ duration: 0.3 }}
           className="gallery-modal-overlay"
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
         >
           {/* Header */}
           <div className="gallery-header">
@@ -64,10 +73,10 @@ export default function GalleryModal({ show, onClose, images, title, filenamePre
                 const imgUrl = pic.jpg?.large_image_url || pic.jpg?.image_url;
                 return (
                   <motion.div 
-                    key={idx}
+                    key={imgUrl || idx}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
+                    transition={{ delay: Math.min(idx * 0.05, 0.3) }}
                     className="gallery-card"
                   >
                     <img

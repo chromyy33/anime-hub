@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Download, ArrowRight, Search, LayoutGrid, Info, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
+import { toast } from 'react-toastify';
 import { fetchCached } from '../utils/cache';
 import { useWatchlist } from '../context/WatchlistContext';
 import SEO from '../components/SEO';
@@ -19,8 +19,6 @@ export default function SchedulePage() {
   const scrollRef = useRef(null);
   const { allEntries } = useWatchlist();
   
-  useEffect(() => {
-  }, []);
 
   // Helper for time conversion
   const getLocalTime = (broadcast) => {
@@ -100,13 +98,13 @@ export default function SchedulePage() {
     });
   }, [scheduleData, activeDay, searchQuery]);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setShowLeftBtn(scrollLeft > 5);
       setShowRightBtn(scrollLeft < scrollWidth - clientWidth - 5);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkScroll();
@@ -124,7 +122,7 @@ export default function SchedulePage() {
   const downloadICS = () => {
     const airingWatchlist = allEntries.filter(a => a.status === 'watching');
     if (airingWatchlist.length === 0) {
-        alert("First, add some airing anime to your 'Watching' list!");
+        toast.info("Add airing anime to your Watching list first!");
         return;
     }
     let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//AniDoc//Anime Schedule//EN\n";
@@ -146,53 +144,6 @@ export default function SchedulePage() {
         description="Check the weekly anime airing schedule on AniDoc. Real-time release dates and times for your favorite ongoing shows."
         url="/schedule"
       />
-      <style>
-        {`
-          .schedule-container * { font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif !important; }
-          .day-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-          .day-btn:hover:not(.active) { background: var(--bg-surface-hover); border-color: var(--border-strong); }
-          .guide-item { display: flex; align-items: center; gap: 14px; line-height: 1.5; }
-          
-          .scroll-mask {
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            flex: 1;
-          }
-          .scroll-mask.has-overflow-left {
-            -webkit-mask-image: linear-gradient(to right, transparent, black 40px);
-            mask-image: linear-gradient(to right, transparent, black 40px);
-          }
-          .scroll-mask.has-overflow-right {
-            -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
-            mask-image: linear-gradient(to left, transparent, black 40px);
-          }
-          .scroll-mask.has-overflow-left.has-overflow-right {
-            -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-            mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-          }
-
-          .scroll-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 44px;
-            background: transparent;
-            border: none;
-            color: var(--primary);
-            cursor: pointer;
-            z-index: 10;
-            transition: all 0.2s;
-            flex-shrink: 0;
-          }
-          .scroll-btn:hover { 
-            color: var(--primary);
-            transform: scale(1.2);
-          }
-        `}
-      </style>
       
       <div className="schedule-container">
         {/* Header Area */}
@@ -257,7 +208,6 @@ export default function SchedulePage() {
                       scrollBehavior: 'smooth',
                     }}
                   >
-                    <style>{`.flex::-webkit-scrollbar { display: none; }`}</style>
                     {DAYS.map(day => (
                       <button
                         key={day}
@@ -306,8 +256,8 @@ export default function SchedulePage() {
         ) : (
           <div className="grid-list" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))' }}>
             {activeList.length > 0 ? (
-              activeList.map((anime, i) => (
-                <AnimeCard key={`${anime.mal_id}-${i}`} anime={anime} index={i} variant="list" />
+              activeList.map((anime) => (
+                <AnimeCard key={anime.mal_id} anime={anime} variant="list" />
               ))
             ) : (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 0', color: 'var(--text-tertiary)' }}>

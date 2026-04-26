@@ -80,6 +80,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
       {isIcon || isDots ? (
         <button
           onClick={handleDirectClick}
+          title={inList ? `Watchlist: ${cfg?.label}` : 'Add to Watchlist'}
           style={{
             width: 28, height: 28, borderRadius: 6,
             background: 'rgba(0,0,0,0.6)', 
@@ -158,6 +159,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
               flexShrink: 0,
             }}
             aria-label="Open watchlist options"
+            aria-expanded={open}
           >
             <ChevronDown size={isMinimal ? 13 : 15} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
@@ -174,8 +176,8 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             style={{
               position: 'absolute', 
-              top: isBadge ? 'unset' : 'calc(100% + 8px)', 
-              bottom: isBadge ? 'calc(100% + 4px)' : 'unset',
+              top: 'calc(100% + 8px)', 
+              bottom: 'unset',
               left: 0, 
               zIndex: 1000,
               background: `linear-gradient(165deg, rgba(255, 255, 255, 0.1), transparent), var(--bg-elevated)`,
@@ -210,9 +212,9 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                     onMouseOver={e => { if (!isActive) e.currentTarget.style.background = 'rgba(16,185,129,0.12)'; }}
                     onMouseOut={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <Icon size={14} color={isActive ? 'var(--primary)' : 'var(--text-tertiary)'} />
+                    <Icon size={14} color={isActive ? 'var(--primary)' : 'var(--text-tertiary)'} aria-hidden="true" />
                     {label}
-                    {isActive && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--primary)' }} />}
+                    {isActive && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--primary)' }} aria-hidden="true" />}
                   </button>
                 );
               })}

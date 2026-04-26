@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Clock, BookmarkPlus, Check, Eye } from 'lucide-react';
+import { Star, Clock } from 'lucide-react';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from './WatchlistButton';
 
@@ -21,15 +21,6 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
     navigate(`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
-  const handleQuickAdd = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (inList) {
-        removeFromList(anime.mal_id);
-    } else {
-        addToList(anime, 'plan');
-    }
-  };
 
   // Grid Variant (Used in Search/Home)
   if (variant === 'grid') {
@@ -43,14 +34,10 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
           </div>
 
           <div className="card-img-wrap">
-            <img src={anime.images.jpg.large_image_url} alt={anime.title} className="card-img" />
+            <img src={anime.images?.jpg?.large_image_url} alt={anime.title} className="card-img" />
             {anime.score && (
-              <span className="badge" style={{ 
-                position: 'absolute', top: 10, right: 10, 
-                background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', 
-                border: '1px solid var(--badge-border)', color: '#fff', 
-                fontSize: 12, height: 28, padding: '0 10px', gap: 4, zIndex: 5,
-                display: 'flex', alignItems: 'center'
+              <span className="badge anime-card__badge-score" style={{ 
+                position: 'absolute', top: 10, right: 10, zIndex: 5
               }}>
                 <Star size={11} fill="var(--primary)" color="var(--primary)" /> {anime.score}
               </span>
@@ -103,26 +90,12 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
         }}>
         
         {/* Quick Add Button */}
-        {/* Quick Add Button */}
-        <button 
-            onClick={handleQuickAdd}
-            style={{
-                position: 'absolute', top: 12, right: 12, zIndex: 10,
-                width: inList ? 24 : 28, height: inList ? 24 : 28, borderRadius: inList ? 6 : 7,
-                background: inList ? 'var(--primary)' : 'var(--bg-base)',
-                color: inList ? '#fff' : 'var(--text-tertiary)', 
-                border: '1px solid var(--border-subtle)', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-                // Explicitly disable any inherited hover scaling if it existed
-                transform: 'none'
-            }}
-        >
-            {inList ? <Check size={12} strokeWidth={2.5} /> : <BookmarkPlus size={15} />}
-        </button>
+        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
+          <WatchlistButton anime={anime} variant="icon" />
+        </div>
 
         <div style={{ width: 85, height: 115, flexShrink: 0 }}>
-            <img src={anime.images.jpg.image_url} alt={anime.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} />
+            <img src={anime.images?.jpg?.image_url} alt={anime.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>

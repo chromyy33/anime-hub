@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Sparkles, Search, Calendar, Moon, Sun, X, ArrowLeft, ArrowRight,
-  Filter, Play, Star, Clock, BookmarkPlus, ChevronDown, Check, ExternalLink,
-  Menu, TrendingUp, Zap
+  Sparkles, Search, Calendar, Moon, Sun, X,
+  Star, Clock, Menu, TrendingUp
 } from 'lucide-react';
 import Home from './pages/Home';
 import AnimeDetails from './pages/AnimeDetails';
@@ -18,7 +17,118 @@ import { fetchCached } from './utils/cache';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function Navbar({ isDark, setIsDark }) {
+// ─── Mobile Menu Component (Memoized) ──────────────────────────────────
+const MobileMenu = memo(({ open, onClose, animeOfDay, isDark, setIsDark }) => {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div 
+            key="backdrop"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1999, backdropFilter: 'blur(4px)' }}
+          />
+          <motion.div 
+            key="drawer"
+            initial={{ x: '100vw' }} animate={{ x: 0 }} exit={{ x: '100vw' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+            style={{ 
+              willChange: 'transform',
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: '75vw',
+              maxWidth: '320px',
+              zIndex: 2000,
+              background: 'var(--bg-elevated)',
+              backdropFilter: 'blur(48px)',
+              WebkitBackdropFilter: 'blur(48px)',
+              borderLeft: '1px solid var(--border-strong)',
+              overflowY: 'auto',
+              padding: '32px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+              <button className="icon-btn" onClick={onClose} style={{ background: 'var(--bg-surface-hover)', border: '1px solid var(--border-strong)' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <Link to="/schedule" className="mobile-menu-item" onClick={onClose}>
+                <Calendar size={18} color="var(--primary)" />
+                Schedule
+              </Link>
+              <Link to="/" className="mobile-menu-item" onClick={onClose}>
+                <TrendingUp size={18} color="var(--primary)" />
+                Top Airing
+              </Link>
+              <Link to="/search" className="mobile-menu-item" onClick={onClose}>
+                <Search size={18} color="var(--primary)" />
+                Browse All
+              </Link>
+            </div>
+
+            {animeOfDay && (
+              <div style={{ marginTop: 24 }}>
+                <div className="menu-section-title">Anime of the Day</div>
+                <Link to={`/anime/${animeOfDay.mal_id}`} onClick={onClose}
+                  style={{ display: 'block', textDecoration: 'none', background: 'var(--bg-surface-active)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ height: 120, position: 'relative' }}>
+                    <img src={animeOfDay.images.jpg.large_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }} />
+                    <div style={{ position: 'absolute', bottom: 8, left: 12, right: 12 }}>
+                      <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 2 }}>Trending Now</div>
+                      <div style={{ color: '#fff', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {animeOfDay.title_english || animeOfDay.title}
+                      </div>
+                    </div>
+                    <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#fff', backdropFilter: 'blur(4px)' }}>
+                      <Star size={10} fill="var(--primary)" color="var(--primary)" />
+                      {animeOfDay.score}
+                    </div>
+                  </div>
+                  <div style={{ padding: 12 }}>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {animeOfDay.synopsis}
+                    </p>
+                    <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                      <span>Rank #{animeOfDay.rank}</span>
+                      <span>·</span>
+                      <span>{animeOfDay.type}</span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            )}
+
+            <div style={{ marginTop: 'auto', padding: '20px 0', borderTop: '1px solid var(--border-subtle)' }}>
+              <button onClick={() => setIsDark(!isDark)}
+                style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface-hover)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                  <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                </div>
+                <div style={{ width: 40, height: 20, borderRadius: 20, background: isDark ? 'var(--primary)' : 'var(--border-strong)', position: 'relative' }}>
+                   <div style={{ position: 'absolute', top: 2, left: isDark ? 22 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+                </div>
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+});
+
+MobileMenu.displayName = 'MobileMenu';
+
+function Navbar({ isDark, setIsDark, setMobileOpen, mobileOpen }) {
   const navigate = useNavigate();
   const [query,       setQuery]       = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -26,24 +136,6 @@ function Navbar({ isDark, setIsDark }) {
   const [loadingSug,  setLoadingSug]  = useState(false);
   const debounceRef = useRef(null);
   const wrapRef     = useRef(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [animeOfDay, setAnimeOfDay] = useState(null);
-
-  // Fetch Anime of the Day
-  useEffect(() => {
-    const fetchAOD = async () => {
-      try {
-        const randomPage = Math.floor(Math.random() * 4) + 1;
-        const data = await fetchCached(`https://api.jikan.moe/v4/top/anime?page=${randomPage}`, `top_page_${randomPage}`);
-        // fetchCached already returns the .data array for Jikan endpoints
-        if (Array.isArray(data) && data.length > 0) {
-          const random = data[Math.floor(Math.random() * data.length)];
-          setAnimeOfDay(random);
-        }
-      } catch (err) { console.error("AOD fetch failed", err); }
-    };
-    fetchAOD();
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -135,7 +227,7 @@ function Navbar({ isDark, setIsDark }) {
               initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.97 }}
               style={{ 
                 position: 'absolute', top: 'calc(100% + 4px)', left: 0, width: '100%', 
-                background: `linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent), ${isDark ? '#1a1d24' : '#ffffff'}`, 
+                background: `linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent), var(--bg-elevated)`, 
                 border: '1px solid var(--border-strong)', 
                 boxShadow: 'inset 0 0 0 1px var(--glass-border), var(--shadow-lg)', 
                 borderRadius: 'var(--radius-md)', zIndex: 200, overflow: 'hidden' 
@@ -173,115 +265,8 @@ function Navbar({ isDark, setIsDark }) {
       </div>
 
     </nav>
-
-    {/* Mobile Menu Backdrop */}
-    <AnimatePresence>
-      {mobileOpen && (
-        <motion.div 
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={() => setMobileOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1999, backdropFilter: 'blur(4px)' }}
-        />
-      )}
-    </AnimatePresence>
-
-    {/* Mobile Menu Overlay - Side Drawer */}
-    <AnimatePresence>
-      {mobileOpen && (
-        <motion.div 
-          initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="mobile-menu-overlay"
-        >
-          {/* Menu Header - Just Close Button */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-            <button className="icon-btn" onClick={() => setMobileOpen(false)} style={{ background: 'var(--bg-surface-hover)', border: '1px solid var(--border-strong)' }}>
-              <X size={20} />
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <Link to="/schedule" className="mobile-menu-item" onClick={() => setMobileOpen(false)}>
-              <Calendar size={18} color="var(--primary)" />
-              Schedule
-            </Link>
-            <Link to="/" className="mobile-menu-item" onClick={() => { setMobileOpen(false); window.scrollTo({ top: 800, behavior: 'smooth' }); }}>
-              <TrendingUp size={18} color="var(--primary)" />
-              Top Airing
-            </Link>
-            <Link to="/search" className="mobile-menu-item" onClick={() => setMobileOpen(false)}>
-              <Search size={18} color="var(--primary)" />
-              Browse All
-            </Link>
-          </div>
-
-          {animeOfDay && (
-            <div style={{ marginTop: 24 }}>
-              <div className="menu-section-title">Anime of the Day</div>
-              <Link 
-                to={`/anime/${animeOfDay.mal_id}`} 
-                onClick={() => setMobileOpen(false)}
-                style={{ 
-                  display: 'block', textDecoration: 'none', 
-                  background: 'var(--bg-surface-active)',
-                  borderRadius: 'var(--radius-md)', 
-                  border: '1px solid var(--border-subtle)',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                <div style={{ height: 120, position: 'relative' }}>
-                  <img src={animeOfDay.images.jpg.large_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }} />
-                  <div style={{ position: 'absolute', bottom: 8, left: 12, right: 12 }}>
-                    <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 2 }}>Trending Now</div>
-                    <div style={{ color: '#fff', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {animeOfDay.title_english || animeOfDay.title}
-                    </div>
-                  </div>
-                  <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#fff', backdropFilter: 'blur(4px)' }}>
-                    <Star size={10} fill="var(--primary)" color="var(--primary)" />
-                    {animeOfDay.score}
-                  </div>
-                </div>
-                <div style={{ padding: 12 }}>
-                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {animeOfDay.synopsis}
-                  </p>
-                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
-                    <span>Rank #{animeOfDay.rank}</span>
-                    <span>·</span>
-                    <span>{animeOfDay.type}</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
-
-          <div style={{ marginTop: 'auto', padding: '20px 0', borderTop: '1px solid var(--border-subtle)' }}>
-            <button 
-              onClick={() => setIsDark(!isDark)}
-              style={{ 
-                width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', 
-                background: 'var(--bg-surface-hover)', border: '1px solid var(--border-strong)',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
-                <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-              </div>
-              <div style={{ width: 40, height: 20, borderRadius: 20, background: isDark ? 'var(--primary)' : 'var(--border-strong)', position: 'relative' }}>
-                 <div style={{ position: 'absolute', top: 2, left: isDark ? 22 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
-              </div>
-            </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </>
-);
+    </>
+  );
 }
 
 // Global Scroll to Top logic
@@ -298,6 +283,41 @@ function App() {
     const saved = localStorage.getItem('animehub_theme');
     return saved !== null ? JSON.parse(saved) : true;
   });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [animeOfDay, setAnimeOfDay] = useState(null);
+
+  const handleMenuClose = useCallback(() => setMobileOpen(false), []);
+
+  // Fetch Anime of the Day
+  useEffect(() => {
+    const fetchAOD = async () => {
+      try {
+        const stored = localStorage.getItem('animehub_aod');
+        if (stored) {
+          const { anime, expiry } = JSON.parse(stored);
+          if (Date.now() < expiry) {
+            setAnimeOfDay(anime);
+            return;
+          }
+        }
+
+        const randomPage = Math.floor(Math.random() * 4) + 1;
+        const data = await fetchCached(
+          `https://api.jikan.moe/v4/top/anime?page=${randomPage}`,
+          `top_page_${randomPage}`
+        );
+        if (Array.isArray(data) && data.length > 0) {
+          const random = data[Math.floor(Math.random() * data.length)];
+          localStorage.setItem('animehub_aod', JSON.stringify({
+            anime: random,
+            expiry: Date.now() + 24 * 60 * 60 * 1000
+          }));
+          setAnimeOfDay(random);
+        }
+      } catch (err) { console.error("AOD fetch failed", err); }
+    };
+    fetchAOD();
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -308,7 +328,14 @@ function App() {
     <Router>
       <ScrollToTop />
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Navbar isDark={isDark} setIsDark={setIsDark} />
+        <Navbar isDark={isDark} setIsDark={setIsDark} setMobileOpen={setMobileOpen} mobileOpen={mobileOpen} />
+        <MobileMenu 
+          open={mobileOpen}
+          onClose={handleMenuClose}
+          animeOfDay={animeOfDay}
+          isDark={isDark}
+          setIsDark={setIsDark}
+        />
         <main className="app-container" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
           <Routes>
             <Route path="/"           element={<Home />} />

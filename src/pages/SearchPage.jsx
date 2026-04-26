@@ -176,6 +176,7 @@ export default function SearchPage() {
   const [results,    setResults]    = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // ── Active filter count badge ────────────────────────────────────────
@@ -207,6 +208,7 @@ export default function SearchPage() {
   // ── Fetch results ────────────────────────────────────────────────────
   useEffect(() => {
     if (!query && !urlGenres && !urlType && !urlStatus && urlMinScore === 0 && !urlYear) return;
+    setError(null);
     setLoading(true);
     setResults([]);
     fetch(buildUrl())
@@ -216,7 +218,7 @@ export default function SearchPage() {
         setPagination(data.pagination || null);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setError('Search failed. Please try again.'); setLoading(false); });
   }, [buildUrl]);
 
   // ── Apply filters → update URL (resets to page 1) ───────────────────
@@ -251,7 +253,6 @@ export default function SearchPage() {
     setSelectedGenres(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]);
   };
 
-  const filteredGenres = POPULAR_GENRES;
 
   const hasResults = !loading && results.length > 0;
   const isEmpty    = !loading && results.length === 0 && (query || urlGenres);
@@ -267,7 +268,7 @@ export default function SearchPage() {
       {/* ── Page Header ── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', marginBottom: 32 }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          {pagination && <p className="text-xs text-muted" style={{ marginBottom: 6 }}>
+          {pagination && <p className="text-xs" style={{ marginBottom: 6, color: 'var(--text-tertiary)' }}>
             {pagination.items?.total?.toLocaleString()} results
             {query && <> for <span className="text-primary font-semibold">"{query}"</span></>}
           </p>}
@@ -362,8 +363,8 @@ export default function SearchPage() {
                     Popular Genres {selectedGenres.length > 0 && <span style={{ color: 'var(--primary)' }}>({selectedGenres.length} selected)</span>}
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 140, overflowY: 'auto', paddingRight: 4 }}>
-                  {filteredGenres.map(g => (
+                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 140, overflowY: 'auto', paddingRight: 4 }}>
+                  {POPULAR_GENRES.map(g => (
                     <GenrePill key={g.mal_id} genre={g} selected={selectedGenres.includes(g.mal_id)} onToggle={toggleGenre} />
                   ))}
                 </div>
@@ -421,6 +422,14 @@ export default function SearchPage() {
           <SearchX size={48} strokeWidth={1.5} />
           <p style={{ marginTop: 16, fontSize: 16 }}>No results found{query ? ` for "${query}"` : ''}</p>
           {activeCount > 0 && <button onClick={clearFilters} style={{ marginTop: 12, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}>Clear filters and try again</button>}
+        </div>
+      )}
+
+       {/* ── Error state ── */}
+      {error && (
+        <div style={{ textAlign: 'center', padding: '60px 0',
+          color: '#ef4444', fontSize: 15 }}>
+          {error}
         </div>
       )}
 

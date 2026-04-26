@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useLayoutEffect } from 'react';
+import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Carousel({ title, items, renderItem }) {
@@ -6,29 +6,29 @@ export default function Carousel({ title, items, renderItem }) {
   const [showLeft,  setShowLeft]  = useState(false);
   const [showRight, setShowRight] = useState(false);
 
-  const measure = () => {
+  const measure = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
     const hasOverflow = scrollWidth > clientWidth + 12;
     setShowLeft(hasOverflow && scrollLeft > 12);
     setShowRight(hasOverflow && scrollLeft < scrollWidth - clientWidth - 12);
-  };
+  }, []);
 
   useLayoutEffect(() => {
     measure();
     const t = setTimeout(measure, 120);
     return () => clearTimeout(t);
-  }, [items]);
+  }, [items, measure]);
 
   useEffect(() => {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, []);
+  }, [measure]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [dragScrollLeft, setDragScrollLeft] = useState(0);
 
   const onMouseDown = (e) => {
     // Only allow mouse dragging on tablets and mobile (< 1024px)
@@ -38,7 +38,7 @@ export default function Carousel({ title, items, renderItem }) {
     if (!el) return;
     setIsDragging(true);
     setStartX(e.pageX - el.offsetLeft);
-    setScrollLeft(el.scrollLeft);
+    setDragScrollLeft(el.scrollLeft);
   };
 
   const onMouseLeave = () => setIsDragging(false);
@@ -50,8 +50,8 @@ export default function Carousel({ title, items, renderItem }) {
     const el = scrollRef.current;
     if (!el) return;
     const x = e.pageX - el.offsetLeft;
-    const walk = (x - startX) * 2;
-    el.scrollLeft = scrollLeft - walk;
+    const walk = (x - startX) * 1.5;
+    el.scrollLeft = dragScrollLeft - walk;
   };
 
   const scroll = (dir) => {

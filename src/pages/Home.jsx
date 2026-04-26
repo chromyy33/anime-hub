@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Calendar, Star, Play, Sword, Heart, Trophy, BookOpen, X, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import { TrendingUp, Calendar, Star, Play, Sword, Heart, Trophy, BookOpen, ChevronLeft, ChevronRight, LayoutGrid, Zap } from 'lucide-react';
 import AnimeCard from '../components/AnimeCard';
 import Carousel from '../components/Carousel';
 import { fetchCached, sleep } from '../utils/cache';
@@ -127,8 +127,8 @@ function HeroSlider({ slides }) {
 
       {/* Dot nav */}
       <div style={{ position: 'absolute', bottom: 20, right: 28, zIndex: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
-        {slides.map((_, i) => (
-          <button key={i} onClick={() => setActive(i)}
+        {slides.map((slide, i) => (
+          <button key={slide.mal_id} onClick={() => setActive(i)}
             style={{ width: i === active ? 24 : 8, height: 8, borderRadius: 99, border: 'none', cursor: 'pointer', transition: 'all 0.3s', background: i === active ? 'var(--primary)' : 'rgba(255,255,255,0.35)', padding: 0 }}
           />
         ))}
@@ -149,7 +149,7 @@ function SectionHeader({ Icon, title, subtitle, linkTo }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <h2 className="text-lg font-bold" style={{ margin: 0, lineHeight: 1.2 }}>{title}</h2>
-          {subtitle && <p className="text-sm text-muted" style={{ margin: 0, opacity: 0.8 }}>{subtitle}</p>}
+          {subtitle && <p className="text-sm" style={{ margin: 0, opacity: 0.8, color: 'var(--text-tertiary)' }}>{subtitle}</p>}
         </div>
       </div>
       {linkTo && (
@@ -174,21 +174,19 @@ function SkeletonRow() {
 export default function Home() {
   const [data, setData] = useState({ airing: [], upcoming: [], top: [], movies: [], action: [], romance: [], recommended: [] });
   const [loading, setLoading] = useState(true);
-  const [loadingWatchlist, setLoadingWatchlist] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const { allEntries, isInList, removeFromList } = useWatchlist();
 
   // 1. Initial data load
   useEffect(() => {
-    setTimeout(() => setLoadingWatchlist(false), 800);
     let cancelled = false;
 
     const load = async () => {
+      setLoading(true);
+      setErrorMsg('');
       try {
         const seenIds = new Set();
-        
-        // Helper to dedupe internal list AND against global seen set
         const dedupeSection = (arr) => {
           if (!arr) return [];
           return arr.filter(item => {
@@ -198,36 +196,36 @@ export default function Home() {
           });
         };
 
-        const airingRaw   = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15',    'home_airing');
-        const airing = dedupeSection(airingRaw);
-        await sleep(500);
+        const updateSection = (key, data) => {
+          if (!cancelled) {
+            setData(prev => ({ ...prev, [key]: dedupeSection(data) }));
+          }
+        };
 
-        const upcomingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15',  'home_upcoming');
-        const upcoming = dedupeSection(upcomingRaw);
-        await sleep(500);
+        const airingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15', 'home_airing');
+        updateSection('airing', airingRaw);
+        await sleep(400);
 
-        const topRaw      = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15',                  'home_top');
-        const top = dedupeSection(topRaw);
-        await sleep(500);
+        const upcomingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15', 'home_upcoming');
+        updateSection('upcoming', upcomingRaw);
+        await sleep(400);
 
-        const moviesRaw   = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15',       'home_movies');
-        const movies = dedupeSection(moviesRaw);
-        await sleep(500);
+        const topRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15', 'home_top');
+        updateSection('top', topRaw);
+        await sleep(400);
 
-        const actionRaw   = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
-        const action = dedupeSection(actionRaw);
-        await sleep(500);
+        const moviesRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15', 'home_movies');
+        updateSection('movies', moviesRaw);
+        await sleep(400);
 
-        const romanceRaw  = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15','home_romance');
-        const romance = dedupeSection(romanceRaw);
+        const actionRaw = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
+        updateSection('action', actionRaw);
+        await sleep(400);
 
-        if (!cancelled) {
-          setData(prev => ({ 
-            ...prev, 
-            airing, upcoming, top, movies, action, romance 
-          }));
-          setLoading(false);
-        }
+        const romanceRaw = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15', 'home_romance');
+        updateSection('romance', romanceRaw);
+
+        if (!cancelled) setLoading(false);
       } catch (err) {
         if (!cancelled) { setErrorMsg(err.message); setLoading(false); }
       }
@@ -288,7 +286,6 @@ export default function Home() {
     loadRecs();
   }, [allEntries, data.recommended.length, loading, data.airing, data.upcoming, data.top, data.movies, data.action, data.romance]);
 
-  const heroAnime = data.airing[0];
 
   if (errorMsg) return (
     <div style={{ textAlign: 'center', marginTop: 100, color: '#ef4444', fontWeight: 600 }}>{errorMsg}</div>
@@ -309,14 +306,11 @@ export default function Home() {
       }
 
       {/* ── YOUR WATCHLIST ── (only if user has items) */}
-      {(loadingWatchlist || allEntries.length > 0) && (
+      {allEntries.length > 0 && (
         <section>
-          <SectionHeader Icon={BookOpen} title="Your Watchlist" subtitle={allEntries.length > 0 ? `${allEntries.length} anime saved` : 'Getting your list ready...'} />
-          {loadingWatchlist ? (
-             <SkeletonRow />
-          ) : (
-            <Carousel
-              items={allEntries}
+          <SectionHeader Icon={BookOpen} title="Your Watchlist" subtitle={`${allEntries.length} anime saved`} />
+          <Carousel
+            items={allEntries}
             renderItem={(entry, idx) => (
               <motion.div
                 key={entry.mal_id} custom={idx} variants={fadeUp} initial="hidden" animate="visible"
@@ -357,7 +351,6 @@ export default function Home() {
               </motion.div>
             )}
           />
-          )}
         </section>
       )}
       
@@ -382,50 +375,62 @@ export default function Home() {
 
       {/* ── TOP AIRING ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="The hottest shows currently on air" />
-          <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.airing.length === 0 && loading ? <SkeletonRow /> : data.airing.length > 0 && (
+          <>
+            <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="The hottest shows currently on air" linkTo="/search?filter=airing" />
+            <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
 
       {/* ── TOP MOVIES ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" />
-          <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.movies.length === 0 && loading ? <SkeletonRow /> : data.movies.length > 0 && (
+          <>
+            <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" />
+            <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
 
       {/* ── ACTION & ADVENTURE ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={Sword} title="Action & Adventure" subtitle="High-octane fights and epic journeys" />
-          <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.action.length === 0 && loading ? <SkeletonRow /> : data.action.length > 0 && (
+          <>
+            <SectionHeader Icon={Zap} title="Action & Adventure" subtitle="High-octane fights and epic journeys" />
+            <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
 
       {/* ── ROMANCE ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" />
-          <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.romance.length === 0 && loading ? <SkeletonRow /> : data.romance.length > 0 && (
+          <>
+            <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" />
+            <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
 
       {/* ── ANTICIPATED ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" />
-          <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.upcoming.length === 0 && loading ? <SkeletonRow /> : data.upcoming.length > 0 && (
+          <>
+            <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" />
+            <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
 
       {/* ── ALL-TIME CLASSICS ── */}
       <section>
-        {loading ? <SkeletonRow /> : <>
-          <SectionHeader Icon={Trophy} title="All-Time Classics" subtitle="The highest-rated anime of all time" />
-          <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
-        </>}
+        {data.top.length === 0 && loading ? <SkeletonRow /> : data.top.length > 0 && (
+          <>
+            <SectionHeader Icon={Trophy} title="All-Time Classics" subtitle="The highest-rated anime of all time" linkTo="/search?filter=top" />
+            <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+          </>
+        )}
       </section>
     </div>
   );
