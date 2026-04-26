@@ -180,43 +180,50 @@ export default function Home() {
 
   // 1. Initial data load
   useEffect(() => {
-    // Artificial delay for watchlist to match other skeletons
     setTimeout(() => setLoadingWatchlist(false), 800);
     let cancelled = false;
 
-    const dedupe = (arr) => {
-      if (!arr) return [];
-      const seen = new Set();
-      return arr.filter(item => {
-        if (seen.has(item.mal_id)) return false;
-        seen.add(item.mal_id);
-        return true;
-      });
-    };
-
     const load = async () => {
       try {
-        const airing   = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15',    'home_airing');
+        const seenIds = new Set();
+        
+        // Helper to dedupe internal list AND against global seen set
+        const dedupeSection = (arr) => {
+          if (!arr) return [];
+          return arr.filter(item => {
+            if (seenIds.has(item.mal_id)) return false;
+            seenIds.add(item.mal_id);
+            return true;
+          });
+        };
+
+        const airingRaw   = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15',    'home_airing');
+        const airing = dedupeSection(airingRaw);
         await sleep(500);
-        const upcoming = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15',  'home_upcoming');
+
+        const upcomingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15',  'home_upcoming');
+        const upcoming = dedupeSection(upcomingRaw);
         await sleep(500);
-        const top      = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15',                  'home_top');
+
+        const topRaw      = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15',                  'home_top');
+        const top = dedupeSection(topRaw);
         await sleep(500);
-        const movies   = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15',       'home_movies');
+
+        const moviesRaw   = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15',       'home_movies');
+        const movies = dedupeSection(moviesRaw);
         await sleep(500);
-        const action   = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
+
+        const actionRaw   = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
+        const action = dedupeSection(actionRaw);
         await sleep(500);
-        const romance  = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15','home_romance');
+
+        const romanceRaw  = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15','home_romance');
+        const romance = dedupeSection(romanceRaw);
 
         if (!cancelled) {
           setData(prev => ({ 
             ...prev, 
-            airing: dedupe(airing), 
-            upcoming: dedupe(upcoming), 
-            top: dedupe(top), 
-            movies: dedupe(movies), 
-            action: dedupe(action), 
-            romance: dedupe(romance) 
+            airing, upcoming, top, movies, action, romance 
           }));
           setLoading(false);
         }
@@ -230,7 +237,7 @@ export default function Home() {
 
   // 2. Fetch Smart Recommendations based on Watchlist
   useEffect(() => {
-    if (allEntries.length === 0 || data.recommended.length > 0) return;
+    if (allEntries.length === 0 || data.recommended.length > 0 || loading) return;
 
     const loadRecs = async () => {
         setLoadingRecs(true);
@@ -239,19 +246,29 @@ export default function Home() {
             const primary = sorted.find(a => a.status === 'watching') || sorted[0];
             
             const recRes = await fetchCached(`https://api.jikan.moe/v4/anime/${primary.mal_id}/recommendations`, `home_recs_${primary.mal_id}`);
-            const rawList = recRes?.filter(r => r?.entry).slice(0, 8) || [];
+            const rawList = recRes?.filter(r => r?.entry).slice(0, 12) || [];
             
-            // Enrich minimal recommendation entries with full data to avoid "empty" cards
+            // Collect all IDs currently shown in other sections to filter them out
+            const displayedIds = new Set([
+              ...data.airing.map(a => a.mal_id),
+              ...data.upcoming.map(a => a.mal_id),
+              ...data.top.map(a => a.mal_id),
+              ...data.movies.map(a => a.mal_id),
+              ...data.action.map(a => a.mal_id),
+              ...data.romance.map(a => a.mal_id),
+              ...allEntries.map(a => a.mal_id)
+            ]);
+
             const enrichedList = [];
             for (const rec of rawList) {
+                if (displayedIds.has(rec.entry.mal_id)) continue;
+                if (enrichedList.length >= 8) break;
+
                 try {
-                    // Fetch full details for each recommended item
                     const fullData = await fetchCached(`https://api.jikan.moe/v4/anime/${rec.entry.mal_id}`, `anime_full_${rec.entry.mal_id}`);
                     if (fullData) enrichedList.push(fullData);
-                    // Small delay to be kind to Jikan rate limits
                     await sleep(400); 
                 } catch (e) {
-                    // Fallback to minimal data if full fetch fails
                     enrichedList.push({
                         mal_id: rec.entry.mal_id,
                         title: rec.entry.title,
@@ -268,7 +285,7 @@ export default function Home() {
         }
     };
     loadRecs();
-  }, [allEntries, data.recommended.length]);
+  }, [allEntries, data.recommended.length, loading, data.airing, data.upcoming, data.top, data.movies, data.action, data.romance]);
 
   const heroAnime = data.airing[0];
 
