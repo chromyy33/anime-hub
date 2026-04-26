@@ -14,7 +14,7 @@ export default function Footer() {
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Sparkles size={18} color="#fff" fill="#fff" />
             </div>
-            ANIME<span style={{ color: 'var(--primary)' }}>DOC</span>
+            ANI<span style={{ color: 'var(--primary)' }}>DOC</span>
           </Link>
           <p className="footer-desc">
             A premium anime tracking experience built for the modern fan. 

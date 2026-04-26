@@ -146,9 +146,9 @@ function SectionHeader({ Icon, title, subtitle, linkTo }) {
         <div className="section-icon">
           <Icon size={18} color="var(--primary)" />
         </div>
-        <div>
-          <h2 className="text-lg font-bold" style={{ margin: 0 }}>{title}</h2>
-          {subtitle && <p className="text-sm text-muted" style={{ margin: 0 }}>{subtitle}</p>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <h2 className="text-lg font-bold" style={{ margin: 0, lineHeight: 1.2 }}>{title}</h2>
+          {subtitle && <p className="text-sm text-muted" style={{ margin: 0, opacity: 0.8 }}>{subtitle}</p>}
         </div>
       </div>
       {linkTo && (

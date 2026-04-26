@@ -140,7 +140,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
           </button>
 
           {/* Divider line */}
-          <div style={{ width: 1, background: 'rgba(255,255,255,0.15)', flexShrink: 0, alignSelf: 'stretch' }} />
+          <div style={{ width: 1, background: 'var(--border-strong)', flexShrink: 0, alignSelf: 'stretch' }} />
 
           {/* ─── 30% right: chevron opens dropdown ─── */}
           <button

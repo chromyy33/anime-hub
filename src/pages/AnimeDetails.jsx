@@ -5,6 +5,7 @@ import { Star, Users, Heart, Trophy, Tv, Calendar, Clock, Film, ExternalLink, Pl
 import Carousel from '../components/Carousel';
 import WatchlistButton from '../components/WatchlistButton';
 import AnimeCard from '../components/AnimeCard';
+import GalleryModal from '../components/GalleryModal';
 
 function DetailsSkeleton() {
   return (
@@ -606,49 +607,13 @@ export default function AnimeDetails() {
               </div>
           )}
 
-          {/* Promo Gallery Modal */}
-          {showGallery && (
-            <div 
-              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}
-              onClick={(e) => { if (e.target === e.currentTarget) setShowGallery(false); }}
-            >
-                {/* Header bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 32px', borderBottom: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
-                    <div>
-                      <h2 style={{ color: 'white', margin: 0, fontFamily: 'Outfit', fontSize: 20 }}>Promo Gallery</h2>
-                      <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: 13, marginTop: 2 }}>{pictures.length} images &mdash; click outside to close</p>
-                    </div>
-                    <button onClick={() => setShowGallery(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', cursor: 'pointer', padding: '8px 16px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
-                        <X size={16}/> Close
-                    </button>
-                </div>
-
-                {/* Grid — no outer scrollbar */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.2) transparent' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-                        {pictures.map((pic, idx) => (
-                            <div key={idx} style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.5)', height: 300 }}>
-                                <img
-                                  src={pic.jpg.large_image_url}
-                                  alt={`Promo ${idx+1}`}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                />
-                                {/* Icon-only download button */}
-                                <button
-                                    onClick={() => downloadImage(pic.jpg.large_image_url, `${anime.title.replace(/\s+/g, '-')}-poster-${idx+1}.jpg`)}
-                                    title="Download"
-                                    style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', width: 36, height: 36, borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                                    onMouseOver={e => e.currentTarget.style.background = 'var(--primary)'}
-                                    onMouseOut={e => e.currentTarget.style.background = 'rgba(0,0,0,0.55)'}
-                                >
-                                    <Download size={16} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-          )}
+          <GalleryModal 
+            show={showGallery} 
+            onClose={() => setShowGallery(false)} 
+            images={pictures}
+            title="Promo Gallery"
+            filenamePrefix={anime.title.replace(/\s+/g, '-')}
+          />
 
         </div>
       </div>

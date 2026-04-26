@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ArrowLeft, X, Download, Star, Film, Mic2, Info, ChevronRight } from 'lucide-react';
 import { fetchCached } from '../utils/cache';
+import GalleryModal from '../components/GalleryModal';
 
 // ─── Character Skeleton ──────────────────────────────────────────────
 function CharacterSkeleton() {
@@ -234,41 +235,13 @@ export default function CharacterDetails() {
         </div>
       </div>
 
-      {/* Gallery Modal */}
-      <AnimatePresence>
-        {showGallery && (
-            <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}
-                onClick={(e) => { if (e.target === e.currentTarget) setShowGallery(false); }}
-            >
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div>
-                        <h2 style={{ color: '#fff', margin: 0, fontSize: 20 }}>Character Wallpapers</h2>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', margin: '4px 0 0 0', fontSize: 13 }}>{pictures.length} HD images available</p>
-                    </div>
-                    <button onClick={() => setShowGallery(false)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', padding: '8px 16px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <X size={20}/> Close
-                    </button>
-                </div>
-                <div style={{ flex: 1, overflowY: 'auto', padding: 40 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
-                        {pictures.map((p, i) => (
-                            <div key={i} style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', background: '#111', height: 320 }}>
-                                <img src={p.jpg?.large_image_url || p.jpg?.image_url} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                                <button
-                                    onClick={() => downloadImage(p.jpg?.large_image_url || p.jpg?.image_url, `${data.name.replace(/\s+/g, '-')}-wallpaper-${i+1}.jpg`)}
-                                    style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', width: 36, height: 36, borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    <Download size={16} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </motion.div>
-        )}
-      </AnimatePresence>
+      <GalleryModal 
+        show={showGallery} 
+        onClose={() => setShowGallery(false)} 
+        images={pictures}
+        title="Character Wallpapers"
+        filenamePrefix={data.name.replace(/\s+/g, '-')}
+      />
     </div>
   );
 }
