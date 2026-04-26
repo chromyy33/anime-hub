@@ -17,7 +17,7 @@ function CharacterSkeleton() {
           <div className="skeleton" style={{ width: '100%', aspectRatio: '2/3', borderRadius: 16, ...itemStyle }} />
           <div className="skeleton" style={{ height: 120, marginTop: 24, borderRadius: 12, ...itemStyle }} />
         </div>
-        <div style={{ flex: 1, minWidth: 'min(100%, 320px)' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div className="skeleton" style={{ width: '60%', height: 48, marginBottom: 12, borderRadius: 8, ...itemStyle }} />
           <div className="skeleton" style={{ width: '30%', height: 24, marginBottom: 40, borderRadius: 4, ...itemStyle }} />
           <div className="skeleton" style={{ height: 200, marginBottom: 48, borderRadius: 12, ...itemStyle }} />
@@ -152,9 +152,9 @@ export default function CharacterDetails() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div style={{ flex: 1, minWidth: 320 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 style={{ fontSize: 44, fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>{data.name}</h1>
+                <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>{data.name}</h1>
                 <h2 style={{ fontSize: 18, color: 'var(--text-tertiary)', fontWeight: 400, marginBottom: 32 }}>{data.name_kanji}</h2>
 
                 <h3 className="section-title">Biography</h3>
@@ -217,7 +217,7 @@ export default function CharacterDetails() {
                             ))}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
                             {filteredVoices.map((v) => (
                                 <div key={v.person.mal_id} className="card" style={{ display: 'flex', gap: 14, padding: 12, alignItems: 'center' }}>
                                     <img src={v.person.images?.jpg?.image_url} alt={v.person.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--border-subtle)' }} />
