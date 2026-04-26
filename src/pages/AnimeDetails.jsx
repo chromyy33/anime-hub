@@ -16,7 +16,7 @@ function DetailsSkeleton() {
           <div style={{ width: '100%', aspectRatio: '2/3', background: 'var(--bg-surface)', borderRadius: 16 }} />
           <div style={{ height: 160, background: 'var(--bg-surface)', marginTop: 24, borderRadius: 12 }} />
         </div>
-        <div style={{ flex: 1, minWidth: 'min(100%, 320px)' }}>
+        <div>
           <div style={{ width: '70%', height: 54, background: 'var(--bg-surface)', marginBottom: 12, borderRadius: 8 }} />
           <div style={{ width: '30%', height: 28, background: 'var(--bg-surface)', marginBottom: 40, borderRadius: 4 }} />
           <div style={{ height: 300, background: 'var(--bg-surface)', borderRadius: 16 }} />
