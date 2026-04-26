@@ -80,13 +80,15 @@ function HeroSlider({ slides }) {
           {/* Bottom: Main Text */}
           <motion.div variants={textVariants} initial="enter" animate="center" exit="exit"
             className="hero-content"
-            style={{ position: 'absolute', bottom: 40, left: 24, right: 24, maxWidth: 850 }}
+            style={{ position: 'absolute', bottom: 40, left: 24, right: 24 }}
           >
-            <Link to={`/anime/${anime.mal_id}`} style={{ textDecoration: 'none', color: '#fff' }}>
-              <h1 style={{ color: '#fff' }}>
-                {anime.title_english || anime.title}
-              </h1>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: '80%' }}>
+            <div style={{ color: '#fff' }}>
+              <Link to={`/anime/${anime.mal_id}`} style={{ textDecoration: 'none', color: '#fff' }}>
+                <h1 style={{ color: '#fff' }}>
+                  {anime.title_english || anime.title}
+                </h1>
+              </Link>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {anime.synopsis}
               </p>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -106,14 +108,14 @@ function HeroSlider({ slides }) {
                   </span>
                 )}
               </div>
-            </Link>
+            </div>
           </motion.div>
         </motion.div>
       </AnimatePresence>
 
       {/* Prev / Next */}
-      {[{ dir: 'prev', onClick: prev, style: { left: 0 }, Icon: ChevronLeft },
-        { dir: 'next', onClick: next, style: { right: 0 }, Icon: ChevronRight }].map(({ dir, onClick, style, Icon }) => (
+      {[{ dir: 'prev', onClick: prev, style: { left: 10 }, Icon: ChevronLeft },
+        { dir: 'next', onClick: next, style: { right: 10 }, Icon: ChevronRight }].map(({ dir, onClick, style, Icon }) => (
         <button key={dir} onClick={onClick}
           className="slider-btn"
           style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 10, ...style }}
@@ -181,22 +183,41 @@ export default function Home() {
     // Artificial delay for watchlist to match other skeletons
     setTimeout(() => setLoadingWatchlist(false), 800);
     let cancelled = false;
+
+    const dedupe = (arr) => {
+      if (!arr) return [];
+      const seen = new Set();
+      return arr.filter(item => {
+        if (seen.has(item.mal_id)) return false;
+        seen.add(item.mal_id);
+        return true;
+      });
+    };
+
     const load = async () => {
       try {
-        const airing   = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=12',    'home_airing');
+        const airing   = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15',    'home_airing');
         await sleep(500);
-        const upcoming = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=12',  'home_upcoming');
+        const upcoming = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15',  'home_upcoming');
         await sleep(500);
-        const top      = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=12',                  'home_top');
+        const top      = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15',                  'home_top');
         await sleep(500);
-        const movies   = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=12',       'home_movies');
+        const movies   = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15',       'home_movies');
         await sleep(500);
-        const action   = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=12', 'home_action');
+        const action   = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
         await sleep(500);
-        const romance  = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=12','home_romance');
+        const romance  = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15','home_romance');
 
         if (!cancelled) {
-          setData(prev => ({ ...prev, airing, upcoming, top, movies, action, romance }));
+          setData(prev => ({ 
+            ...prev, 
+            airing: dedupe(airing), 
+            upcoming: dedupe(upcoming), 
+            top: dedupe(top), 
+            movies: dedupe(movies), 
+            action: dedupe(action), 
+            romance: dedupe(romance) 
+          }));
           setLoading(false);
         }
       } catch (err) {
@@ -214,21 +235,32 @@ export default function Home() {
     const loadRecs = async () => {
         setLoadingRecs(true);
         try {
-            // Sort by addedAt desc to get the latest interest
             const sorted = [...allEntries].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
-            // Prefer 'watching' status first
             const primary = sorted.find(a => a.status === 'watching') || sorted[0];
             
-            const res = await fetchCached(`https://api.jikan.moe/v4/anime/${primary.mal_id}/recommendations`, `home_recs_${primary.mal_id}`);
-            // Flatten to get anime objects
-            const list = res?.slice(0, 12).map(r => ({
-                mal_id: r.entry.mal_id,
-                title: r.entry.title,
-                images: r.entry.images,
-                // These recommendation results are minimal, we could fetch more or just display minimal
-            })) || [];
+            const recRes = await fetchCached(`https://api.jikan.moe/v4/anime/${primary.mal_id}/recommendations`, `home_recs_${primary.mal_id}`);
+            const rawList = recRes?.filter(r => r?.entry).slice(0, 8) || [];
+            
+            // Enrich minimal recommendation entries with full data to avoid "empty" cards
+            const enrichedList = [];
+            for (const rec of rawList) {
+                try {
+                    // Fetch full details for each recommended item
+                    const fullData = await fetchCached(`https://api.jikan.moe/v4/anime/${rec.entry.mal_id}`, `anime_full_${rec.entry.mal_id}`);
+                    if (fullData) enrichedList.push(fullData);
+                    // Small delay to be kind to Jikan rate limits
+                    await sleep(400); 
+                } catch (e) {
+                    // Fallback to minimal data if full fetch fails
+                    enrichedList.push({
+                        mal_id: rec.entry.mal_id,
+                        title: rec.entry.title,
+                        images: rec.entry.images,
+                    });
+                }
+            }
 
-            setData(prev => ({ ...prev, recommended: list, recSource: primary.title }));
+            setData(prev => ({ ...prev, recommended: enrichedList, recSource: primary.title }));
         } catch (err) {
             console.error('Failed to load recommendations', err);
         } finally {
@@ -245,7 +277,7 @@ export default function Home() {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 40, paddingBottom: 80 }}>
+    <div className="page-container" style={{ paddingBottom: 0 }}>
 
       {/* ── FRAMER MOTION HERO SLIDER ── */}
       {data.airing.length > 0
@@ -268,7 +300,7 @@ export default function Home() {
                 style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start', position: 'relative' }}
               >
                 {/* Quick-delete button */}
-                <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
+                <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 150 }}>
                   <WatchlistButton anime={entry} variant="dots" />
                 </div>
 
@@ -276,7 +308,7 @@ export default function Home() {
                   <div className="card-img-wrap">
                     <img src={entry.image} alt={entry.title} className="card-img" />
                     {entry.score && (
-                      <span className="badge" style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', border: 'none', color: '#fff', fontSize: 12, gap: 4, height: 'auto', padding: '3px 8px' }}>
+                      <span className="badge" style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', border: '1px solid var(--badge-border)', color: '#fff', fontSize: 12, gap: 4, height: 28, padding: '0 10px', display: 'flex', alignItems: 'center' }}>
                         <Star size={11} fill="var(--primary)" color="var(--primary)" /> {entry.score}
                       </span>
                     )}

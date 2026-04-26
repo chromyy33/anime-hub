@@ -43,7 +43,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     bg: 'var(--primary)',
     color: '#fff',
   } : entry.status === 'watching' ? {
-    border: isBadge ? 'none' : '1px solid var(--status-watching-bg)',
+    border: isBadge ? 'none' : '1px solid var(--border-strong)',
     bg: 'var(--status-watching-bg)',
     color: 'var(--status-watching-color)',
   } : {
@@ -53,7 +53,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   };
 
   const cfg = entry ? STATUS_CONFIG[entry.status] : null;
-  const StatusIcon = (isIcon && isDots) || isDots ? MoreHorizontal : (cfg?.Icon ?? BookmarkPlus);
+  const StatusIcon = (isIcon && inList) || isDots ? MoreHorizontal : (cfg?.Icon ?? BookmarkPlus);
 
   const handleDirectClick = (e) => {
     e.preventDefault();
@@ -68,7 +68,9 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     setOpen(v => !v);
   };
 
-  const handleStatusSelect = (key) => {
+  const handleStatusSelect = (e, key) => {
+    e.preventDefault();
+    e.stopPropagation();
     inList ? setStatus(anime.mal_id, key) : addToList(anime, key);
     setOpen(false);
   };
@@ -79,10 +81,10 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
         <button
           onClick={handleDirectClick}
           style={{
-            width: 28, height: 28, borderRadius: '50%',
-            background: isDots ? 'rgba(0,0,0,0.6)' : statusStyle.bg, 
-            color: isDots ? '#fff' : statusStyle.color,
-            border: isDots ? '1px solid rgba(255,255,255,0.15)' : statusStyle.border, 
+            width: 28, height: 28, borderRadius: 6,
+            background: 'rgba(0,0,0,0.6)', 
+            color: '#fff',
+            border: '1px solid var(--badge-border)', 
             cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             backdropFilter: 'blur(12px)', transition: 'all 0.2s',
@@ -128,7 +130,9 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
               fontFamily: 'Plus Jakarta Sans, sans-serif',
               whiteSpace: 'nowrap',
               textTransform: isMinimal ? 'uppercase' : 'none',
-              letterSpacing: isMinimal ? '0.04em' : 'normal'
+              letterSpacing: isMinimal ? '0.04em' : 'normal',
+              minWidth: isMinimal ? 100 : 140,
+              justifyContent: 'center'
             }}
           >
             <StatusIcon size={isMinimal ? 13 : 15} />
@@ -164,24 +168,23 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
       <AnimatePresence>
         {open && !isBadge && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.97 }}
-            transition={{ duration: 0.15 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             style={{
               position: 'absolute', 
               top: isBadge ? 'unset' : 'calc(100% + 8px)', 
               bottom: isBadge ? 'calc(100% + 4px)' : 'unset',
-              left: isBadge ? 0 : (isIcon ? 'unset' : 0), 
-              right: isIcon ? 0 : 'unset',
+              left: 0, 
               zIndex: 1000,
-              background: `linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent), var(--bg-elevated)`,
-              backdropFilter: 'blur(var(--glass-blur))',
-              WebkitBackdropFilter: 'blur(var(--glass-blur))',
-              border: '1px solid var(--border-strong)',
-              boxShadow: 'inset 0 0 0 1px var(--glass-border), var(--shadow-lg)',
+              background: `linear-gradient(165deg, rgba(255, 255, 255, 0.1), transparent), var(--bg-elevated)`,
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
+              border: '1px solid var(--badge-border)',
+              boxShadow: '0 12px 40px -8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1)',
               borderRadius: 'var(--radius-md)',
-              width: 250, overflow: 'hidden',
+              width: 210, overflow: 'hidden',
             }}
           >
             {/* Status options */}
@@ -194,7 +197,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                 return (
                   <button
                     key={key}
-                    onClick={() => handleStatusSelect(key)}
+                    onClick={(e) => handleStatusSelect(e, key)}
                     style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                       padding: '9px 14px', border: 'none', cursor: 'pointer',
@@ -229,7 +232,9 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                 <input
                   type="range" min="0" max="10" step="1"
                   value={sliderVal}
+                  onClick={e => e.stopPropagation()}
                   onChange={e => {
+                    e.stopPropagation();
                     const v = Number(e.target.value);
                     setSliderVal(v);
                     setUserRating(anime.mal_id, v > 0 ? v : null);
@@ -248,7 +253,12 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
             {inList && (
               <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '6px 8px' }}>
                 <button
-                  onClick={() => { removeFromList(anime.mal_id); setOpen(false); }}
+                  onClick={(e) => { 
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeFromList(anime.mal_id); 
+                    setOpen(false); 
+                  }}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                     padding: '8px 10px', background: 'transparent', border: 'none',

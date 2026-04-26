@@ -26,8 +26,36 @@ export default function Carousel({ title, items, renderItem }) {
     return () => window.removeEventListener('resize', measure);
   }, []);
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onMouseDown = (e) => {
+    // Only allow mouse dragging on tablets and mobile (< 1024px)
+    if (window.innerWidth >= 1024) return;
+    
+    const el = scrollRef.current;
+    if (!el) return;
+    setIsDragging(true);
+    setStartX(e.pageX - el.offsetLeft);
+    setScrollLeft(el.scrollLeft);
+  };
+
+  const onMouseLeave = () => setIsDragging(false);
+  const onMouseUp = () => setIsDragging(false);
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const el = scrollRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 2;
+    el.scrollLeft = scrollLeft - walk;
+  };
+
   const scroll = (dir) => {
-    scrollRef.current?.scrollBy({ left: dir === 'left' ? -820 : 820, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -600 : 600, behavior: 'smooth' });
   };
 
   if (!items || items.length === 0) return null;
@@ -50,7 +78,12 @@ export default function Carousel({ title, items, renderItem }) {
         <div
           ref={scrollRef}
           onScroll={measure}
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseUp={onMouseUp}
+          onMouseMove={onMouseMove}
           className="horizontal-scroll"
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
           {items.map(renderItem)}
         </div>

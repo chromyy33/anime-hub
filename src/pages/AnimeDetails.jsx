@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Star, Users, Heart, Trophy, Tv, Calendar, Clock, Film, ExternalLink, PlaySquare, ArrowUpRight, Download, X, Image as ImageIcon, ArrowRight, ArrowLeft } from 'lucide-react';
 import Carousel from '../components/Carousel';
 import WatchlistButton from '../components/WatchlistButton';
+import AnimeCard from '../components/AnimeCard';
 
 function DetailsSkeleton() {
   return (
@@ -166,12 +167,37 @@ export default function AnimeDetails() {
   if (error && !anime) return <div className="text-center" style={{marginTop: 100, color: '#ef4444'}}>{error}</div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 40, paddingBottom: 60 }}>
+    <div className="page-container">
       
       {/* Back Navigation */}
-      <Link to={-1} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: -16, fontSize: 14, fontWeight: 600, transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color='var(--primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-tertiary)'}>
+      <Link to={-1} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 16, fontSize: 14, fontWeight: 600, transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color='var(--primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-tertiary)'}>
         <ArrowLeft size={16} /> Back
       </Link>
+
+      {/* MOBILE HEADER: Shown only on mobile < 768px */}
+      <div className="mobile-title-block">
+        <div className="badge-container" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12, justifyContent: 'flex-start' }}>
+          {anime.genres?.slice(0, 3).map(g => (
+            <span key={g.mal_id} className="badge">{g.name}</span>
+          ))}
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, marginBottom: 16, width: '100%' }}>
+          <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 800, margin: 0, lineHeight: 1.1, letterSpacing: '-0.02em', textAlign: 'left' }}>
+            {anime.title_english || anime.title}
+          </h1>
+          {anime.status === 'Currently Airing' && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--primary)', background: 'rgba(16,185,129,0.1)', padding: '6px 14px', borderRadius: 99, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              <Calendar size={12} /> 
+              AIRING: {localAiring ? `${localAiring.day} at ${localAiring.time}` : anime.broadcast.string}
+            </span>
+          )}
+        </div>
+
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-start' }}>
+          <WatchlistButton anime={anime} variant="minimal" />
+        </div>
+      </div>
       {/* TWO COLUMN LAYOUT */}
       <div className="details-layout">
         
@@ -335,39 +361,41 @@ export default function AnimeDetails() {
         {/* ============================================================== */}
         <div style={{ flex: '1', minWidth: 320, maxWidth: '100%', overflow: 'hidden' }}>
           
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Header */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {anime.genres?.map(g => (
-                <Link key={g.mal_id} to={`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`} className="badge" style={{ transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}>
-                  {g.name}
-                </Link>
-              ))}
+          <div className="desktop-title-block">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            {/* Header */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {anime.genres?.map(g => (
+                  <Link key={g.mal_id} to={`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`} className="badge" style={{ transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}>
+                    {g.name}
+                  </Link>
+                ))}
+              </div>
+              {anime.status === 'Currently Airing' && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--primary)', background: 'rgba(16,185,129,0.1)', padding: '4px 12px', borderRadius: 99, letterSpacing: '0.04em' }}>
+                  <Calendar size={13} /> 
+                  NEXT EPISODE: {localAiring ? `${localAiring.day} at ${localAiring.time}` : anime.broadcast.string}
+                  {localAiring && <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 4 }}>(Local Time)</span>}
+                </span>
+              )}
             </div>
-            {anime.status === 'Currently Airing' && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--primary)', background: 'rgba(16,185,129,0.1)', padding: '4px 12px', borderRadius: 99, letterSpacing: '0.04em' }}>
-                <Calendar size={13} /> 
-                NEXT EPISODE: {localAiring ? `${localAiring.day} at ${localAiring.time}` : anime.broadcast.string}
-                {localAiring && <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 4 }}>(Local Time)</span>}
-              </span>
-            )}
+            <h1 style={{ fontSize: 44, fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>
+              {anime.title_english || anime.title}
+            </h1>
+            <h2 style={{ fontSize: 18, color: 'var(--text-muted)', fontWeight: 400, marginBottom: 20 }}>
+              {anime.title_japanese}
+            </h2>
+            {/* Watchlist CTA */}
+            <div style={{ marginBottom: 32 }}>
+              <WatchlistButton anime={anime} />
+            </div>
+            </motion.div>
           </div>
-          <h1 style={{ fontSize: 44, fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>
-            {anime.title_english || anime.title}
-          </h1>
-          <h2 style={{ fontSize: 18, color: 'var(--text-muted)', fontWeight: 400, marginBottom: 20 }}>
-            {anime.title_japanese}
-          </h2>
-          {/* Watchlist CTA */}
-          <div style={{ marginBottom: 32 }}>
-            <WatchlistButton anime={anime} />
-          </div>
-          </motion.div>
 
           {/* Official Trailer Embed */}
           {anime.trailer?.embed_url && (
-            <div style={{ marginBottom: 40 }}>
+            <div className="trailer-container" style={{ marginBottom: 40, width: '100%' }}>
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 16, border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
                   <iframe 
                     src={anime.trailer.embed_url} 
@@ -541,22 +569,21 @@ export default function AnimeDetails() {
 
           <Carousel 
             title="If You Liked This, Watch These"
-            items={recommendations}
-            renderItem={(rec) => (
-                <Link to={`/anime/${rec.entry.mal_id}`} key={rec.entry.mal_id} className="card-interactive scroll-item" style={{ flex: '0 0 220px', textDecoration: 'none' }}>
-                    <div className="card-img-wrap"><img src={rec.entry.images.jpg.large_image_url} alt={rec.entry.title} className="card-img" /></div>
-                    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        <h3 style={{ fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-primary)' }}>{rec.entry.title}</h3>
-                        <span className="text-muted text-sm">{rec.votes} Users Recommended</span>
-                    </div>
-                </Link>
+            items={recommendations.filter(r => r?.entry)}
+            renderItem={(rec, i) => (
+                <AnimeCard 
+                  key={rec.entry.mal_id} 
+                  anime={rec.entry} 
+                  index={i} 
+                  style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} 
+                />
             )}
           />
 
           {/* USER REVIEWS */}
           {reviews.length > 0 && (
-              <div>
-                  <h3 className="section-title" style={{ fontSize: 22, margin: '0 0 16px 0' }}>Top User Reviews</h3>
+              <div style={{ marginTop: 40 }}>
+                  <h3 className="section-title" style={{ fontSize: 22, margin: '0 0 24px 0' }}>Top User Reviews</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
                       {reviews.map(review => (
                           <div key={review.mal_id} className="card" style={{ padding: 20 }}>

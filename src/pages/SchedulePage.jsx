@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Download, ArrowRight, Search, LayoutGrid, Info, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, Download, ArrowRight, Search, LayoutGrid, Info, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef } from 'react';
 import { fetchCached } from '../utils/cache';
 import { useWatchlist } from '../context/WatchlistContext';
 import AnimeCard from '../components/AnimeCard';
@@ -12,6 +13,9 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState(DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showLeftBtn, setShowLeftBtn] = useState(false);
+  const [showRightBtn, setShowRightBtn] = useState(false);
+  const scrollRef = useRef(null);
   const { allEntries } = useWatchlist();
 
   // Helper for time conversion
@@ -92,13 +96,34 @@ export default function SchedulePage() {
     });
   }, [scheduleData, activeDay, searchQuery]);
 
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftBtn(scrollLeft > 5);
+      setShowRightBtn(scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [scheduleData]);
+
+  const scroll = (dir) => {
+    if (scrollRef.current) {
+      const scrollAmount = 200;
+      scrollRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   const downloadICS = () => {
     const airingWatchlist = allEntries.filter(a => a.status === 'watching');
     if (airingWatchlist.length === 0) {
         alert("First, add some airing anime to your 'Watching' list!");
         return;
     }
-    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//AniStream//Anime Schedule//EN\n";
+    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//AniDoc//Anime Schedule//EN\n";
     airingWatchlist.forEach(anime => {
         icsContent += `BEGIN:VEVENT\nSUMMARY:New Episode: ${anime.title}\nRRULE:FREQ=WEEKLY\nDTSTART:20240101T000000Z\nEND:VEVENT\n`;
     });
@@ -118,6 +143,45 @@ export default function SchedulePage() {
           .day-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
           .day-btn:hover:not(.active) { background: var(--bg-surface-hover); border-color: var(--border-strong); }
           .guide-item { display: flex; align-items: center; gap: 14px; line-height: 1.5; }
+          
+          .scroll-mask {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            flex: 1;
+          }
+          .scroll-mask.has-overflow-left {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 40px);
+            mask-image: linear-gradient(to right, transparent, black 40px);
+          }
+          .scroll-mask.has-overflow-right {
+            -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
+            mask-image: linear-gradient(to left, transparent, black 40px);
+          }
+          .scroll-mask.has-overflow-left.has-overflow-right {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+            mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+          }
+
+          .scroll-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+            flex-shrink: 0;
+          }
+          .scroll-btn:hover { 
+            color: var(--primary);
+            transform: scale(1.2);
+          }
         `}
       </style>
       
@@ -161,23 +225,51 @@ export default function SchedulePage() {
         {/* Day Selector & Search Row */}
         <div className="flex flex-wrap items-center justify-between gap-lg" style={{ marginBottom: 40 }}>
           
-          <div style={{ flex: 1, minWidth: '300px' }}>
+          <div style={{ flex: 1, minWidth: '300px', display: 'flex', alignItems: 'center' }}>
             {!searchQuery ? (
-              <div className="flex gap-xs" style={{ overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none' }}>
-                {DAYS.map(day => (
-                  <button
-                    key={day}
-                    onClick={() => setActiveDay(day)}
-                    className={`chip-filter ${activeDay === day ? 'active' : ''}`}
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {day}
+              <>
+                {showLeftBtn && (
+                  <button className="scroll-btn" onClick={() => scroll('left')}>
+                    <ChevronLeft size={18} />
                   </button>
-                ))}
-              </div>
+                )}
+                <div className={`scroll-mask ${showLeftBtn ? 'has-overflow-left' : ''} ${showRightBtn ? 'has-overflow-right' : ''}`}>
+                  <div 
+                    ref={scrollRef}
+                    onScroll={checkScroll}
+                    className="flex" 
+                    style={{ 
+                      overflowX: 'auto', 
+                      padding: '4px 0', 
+                      gap: '8px',
+                      scrollbarWidth: 'none', 
+                      msOverflowStyle: 'none',
+                      WebkitOverflowScrolling: 'touch',
+                      scrollBehavior: 'smooth',
+                    }}
+                  >
+                    <style>{`.flex::-webkit-scrollbar { display: none; }`}</style>
+                    {DAYS.map(day => (
+                      <button
+                        key={day}
+                        onClick={() => setActiveDay(day)}
+                        className={`chip-filter ${activeDay === day ? 'active' : ''}`}
+                        style={{ textTransform: 'capitalize', height: 44, display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {showRightBtn && (
+                  <button className="scroll-btn" onClick={() => scroll('right')}>
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+              </>
             ) : (
-              <div className="text-sm text-secondary" style={{ fontWeight: 500 }}>
-                  Showing results for <span className="text-accent">"{searchQuery}"</span> across the entire week:
+              <div className="text-sm text-secondary" style={{ fontWeight: 500, height: 44, display: 'flex', alignItems: 'center' }}>
+                  Showing results for <span className="text-accent" style={{ margin: '0 4px' }}>"{searchQuery}"</span> across the entire week:
               </div>
             )}
           </div>

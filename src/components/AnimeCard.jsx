@@ -38,7 +38,7 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
         <Link to={`/anime/${anime.mal_id}`} className="card-interactive" style={{ textDecoration: 'none', display: 'block', position: 'relative' }}>
           
           {/* Quick Add Button */}
-          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 150 }}>
             <WatchlistButton anime={anime} variant="icon" />
           </div>
 
@@ -47,8 +47,10 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
             {anime.score && (
               <span className="badge" style={{ 
                 position: 'absolute', top: 10, right: 10, 
-                background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', 
-                border: 'none', color: '#fff', fontSize: 12, padding: '3px 8px', gap: 4 
+                background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', 
+                border: '1px solid var(--badge-border)', color: '#fff', 
+                fontSize: 12, height: 28, padding: '0 10px', gap: 4, zIndex: 5,
+                display: 'flex', alignItems: 'center'
               }}>
                 <Star size={11} fill="var(--primary)" color="var(--primary)" /> {anime.score}
               </span>
@@ -56,10 +58,12 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
             {anime.type && (
               <span style={{ 
                 position: 'absolute', bottom: 8, left: 8, 
-                fontSize: 10, fontWeight: 700, textTransform: 'uppercase', 
-                padding: '2px 7px', borderRadius: 4, 
-                background: 'rgba(15,23,42,0.8)', color: 'var(--text-primary)', 
-                backdropFilter: 'blur(4px)', letterSpacing: '0.04em' 
+                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', 
+                padding: '0 10px', borderRadius: 4, height: 28,
+                background: 'rgba(15, 23, 42, 0.8)', color: '#fff', 
+                border: '1px solid var(--badge-border)',
+                backdropFilter: 'blur(12px)', letterSpacing: '0.04em',
+                display: 'flex', alignItems: 'center', zIndex: 5
               }}>
                 {anime.type}
               </span>
@@ -99,20 +103,22 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
         }}>
         
         {/* Quick Add Button */}
+        {/* Quick Add Button */}
         <button 
             onClick={handleQuickAdd}
             style={{
                 position: 'absolute', top: 12, right: 12, zIndex: 10,
-                width: 28, height: 28, borderRadius: 6,
+                width: inList ? 24 : 28, height: inList ? 24 : 28, borderRadius: inList ? 6 : 7,
                 background: inList ? 'var(--primary)' : 'var(--bg-base)',
                 color: inList ? '#fff' : 'var(--text-tertiary)', 
                 border: '1px solid var(--border-subtle)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                // Explicitly disable any inherited hover scaling if it existed
+                transform: 'none'
             }}
-            onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary)'}
         >
-            {inList ? <Check size={14} strokeWidth={3} /> : <BookmarkPlus size={14} />}
+            {inList ? <Check size={12} strokeWidth={2.5} /> : <BookmarkPlus size={15} />}
         </button>
 
         <div style={{ width: 85, height: 115, flexShrink: 0 }}>
