@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Users, Heart, Trophy, Tv, Calendar, Clock, Film, ExternalLink, PlaySquare, ArrowUpRight, Download, X, Image as ImageIcon, ArrowRight, ArrowLeft } from 'lucide-react';
 import Carousel from '../components/Carousel';
+import SEO from '../components/SEO';
 import WatchlistButton from '../components/WatchlistButton';
 import AnimeCard from '../components/AnimeCard';
 import GalleryModal from '../components/GalleryModal';
@@ -48,9 +49,6 @@ export default function AnimeDetails() {
         if (!res.ok) throw new Error();
         const full = await res.json();
         setAnime(full.data);
-        if (full.data) {
-          document.title = `${full.data.title_english || full.data.title} — AniDoc`;
-        }
         setLoading(false);
 
         // Step 2: Background secondary data (staggered for rate limits)
@@ -172,6 +170,29 @@ export default function AnimeDetails() {
 
   return (
     <div className="page-container">
+      <SEO 
+        title={anime ? (anime.title_english || anime.title) : 'Loading...'} 
+        description={anime?.synopsis?.slice(0, 160)}
+        image={anime?.images?.jpg?.large_image_url}
+        url={`/anime/${id}`}
+        type="video.tv_show"
+        schema={anime ? {
+          "@context": "https://schema.org",
+          "@type": anime.type === 'Movie' ? 'Movie' : 'TVSeries',
+          "name": anime.title_english || anime.title,
+          "alternateName": anime.title,
+          "description": anime.synopsis,
+          "image": anime.images?.jpg?.large_image_url,
+          "genre": anime.genres?.map(g => g.name),
+          "numberOfEpisodes": anime.episodes,
+          "aggregateRating": anime.score ? {
+            "@type": "AggregateRating",
+            "ratingValue": anime.score,
+            "bestRating": "10",
+            "ratingCount": anime.scored_by || 0
+          } : undefined
+        } : null}
+      />
       
       {/* Back Navigation */}
       <Link to={-1} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 16, fontSize: 14, fontWeight: 600, transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color='var(--primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-tertiary)'}>

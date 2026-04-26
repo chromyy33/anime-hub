@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
 
 export default function GenrePage() {
@@ -13,7 +14,6 @@ export default function GenrePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = `${name.replace(/-/g, ' ')} Anime — AniDoc`;
     setLoading(true);
     fetch(`https://api.jikan.moe/v4/anime?genres=${id}&order_by=score&sort=desc&limit=24&page=${page}`)
       .then(r => r.json())
@@ -32,6 +32,11 @@ export default function GenrePage() {
 
   return (
     <div style={{ paddingBottom: 60 }}>
+      <SEO 
+        title={`${name.replace(/-/g, ' ')} Anime`} 
+        description={`Explore the best ${name.replace(/-/g, ' ')} anime on AniDoc. Top rated and trending titles in the ${name} genre.`}
+        url={`/genre/${id}/${name}`}
+      />
       {/* Header */}
       <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div className="section-icon" style={{ width: 48, height: 48 }}>

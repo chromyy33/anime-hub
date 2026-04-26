@@ -4,6 +4,7 @@ import { Calendar, Clock, Download, ArrowRight, Search, LayoutGrid, Info, CheckC
 import { useRef } from 'react';
 import { fetchCached } from '../utils/cache';
 import { useWatchlist } from '../context/WatchlistContext';
+import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -19,7 +20,6 @@ export default function SchedulePage() {
   const { allEntries } = useWatchlist();
   
   useEffect(() => {
-    document.title = "Airing Schedule — AniDoc";
   }, []);
 
   // Helper for time conversion
@@ -141,6 +141,11 @@ export default function SchedulePage() {
 
   return (
     <div style={{ paddingBottom: 60, fontFamily: "'Plus Jakarta Sans', 'Outfit', sans-serif" }}>
+      <SEO 
+        title="Airing Schedule" 
+        description="Check the weekly anime airing schedule on AniDoc. Real-time release dates and times for your favorite ongoing shows."
+        url="/schedule"
+      />
       <style>
         {`
           .schedule-container * { font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif !important; }

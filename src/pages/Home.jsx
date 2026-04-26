@@ -7,6 +7,7 @@ import Carousel from '../components/Carousel';
 import { fetchCached, sleep } from '../utils/cache';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from '../components/WatchlistButton';
+import SEO from '../components/SEO';
 
 // ─── Framer-motion variants ────────────────────────────────────────────
 const fadeUp = {
@@ -180,7 +181,6 @@ export default function Home() {
 
   // 1. Initial data load
   useEffect(() => {
-    document.title = "AniDoc — Your Ultimate Anime Hub";
     setTimeout(() => setLoadingWatchlist(false), 800);
     let cancelled = false;
 
@@ -296,6 +296,11 @@ export default function Home() {
 
   return (
     <div className="page-container" style={{ paddingBottom: 0 }}>
+      <SEO 
+        title="Your Ultimate Anime Hub" 
+        description="Discover, track, and manage your anime watchlist with AniDoc. Explore the latest airing shows and get smart recommendations." 
+        url="/"
+      />
 
       {/* ── FRAMER MOTION HERO SLIDER ── */}
       {data.airing.length > 0

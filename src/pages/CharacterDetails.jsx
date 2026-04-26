@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ArrowLeft, X, Download, Star, Film, Mic2, Info, ChevronRight } from 'lucide-react';
 import { fetchCached } from '../utils/cache';
+import SEO from '../components/SEO';
 import GalleryModal from '../components/GalleryModal';
 
 // ─── Character Skeleton ──────────────────────────────────────────────
@@ -44,9 +45,6 @@ export default function CharacterDetails() {
         ]);
         setData(charRes);
         setPictures(picRes || []);
-        if (charRes) {
-          document.title = `${charRes.name} — AniDoc`;
-        }
         
         // Auto-select first available language if Japanese isn't found
         if (charRes?.voices) {
@@ -96,6 +94,20 @@ export default function CharacterDetails() {
 
   return (
     <div style={{ paddingBottom: 60 }}>
+      <SEO 
+        title={data ? data.name : 'Loading...'} 
+        description={data?.about?.slice(0, 160)}
+        image={data?.images?.jpg?.image_url}
+        url={`/character/${id}`}
+        type="profile"
+        schema={data ? {
+          "@context": "https://schema.org",
+          "@type": "Thing",
+          "name": data.name,
+          "description": data.about,
+          "image": data.images?.jpg?.image_url
+        } : null}
+      />
       <style>
         {`
           .va-tab { transition: all 0.2s; border-bottom: 2px solid transparent; }

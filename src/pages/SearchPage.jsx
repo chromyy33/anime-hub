@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, SearchX, ChevronLeft, ChevronRight, SlidersHorizontal, X, Check, ChevronDown } from 'lucide-react';
+import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
 
 // ─── Popular genres (curated) ─────────────────────────────────────────
@@ -205,7 +206,6 @@ export default function SearchPage() {
 
   // ── Fetch results ────────────────────────────────────────────────────
   useEffect(() => {
-    document.title = query ? `Results for "${query}" — AniDoc` : "Browse Anime — AniDoc";
     if (!query && !urlGenres && !urlType && !urlStatus && urlMinScore === 0 && !urlYear) return;
     setLoading(true);
     setResults([]);
@@ -258,6 +258,11 @@ export default function SearchPage() {
 
   return (
     <div style={{ paddingBottom: 60 }}>
+      <SEO 
+        title={query ? `Search: ${query}` : 'Browse Anime'} 
+        description={query ? `Search results for ${query} on AniDoc.` : "Browse and filter the vast anime library on AniDoc."}
+        url={`/search${query ? `?q=${query}` : ''}`}
+      />
 
       {/* ── Page Header ── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', marginBottom: 32 }}>
