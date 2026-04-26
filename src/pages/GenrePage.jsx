@@ -13,6 +13,7 @@ export default function GenrePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = `${name.replace(/-/g, ' ')} Anime — AniDoc`;
     setLoading(true);
     fetch(`https://api.jikan.moe/v4/anime?genres=${id}&order_by=score&sort=desc&limit=24&page=${page}`)
       .then(r => r.json())

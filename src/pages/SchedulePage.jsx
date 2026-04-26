@@ -17,6 +17,10 @@ export default function SchedulePage() {
   const [showRightBtn, setShowRightBtn] = useState(false);
   const scrollRef = useRef(null);
   const { allEntries } = useWatchlist();
+  
+  useEffect(() => {
+    document.title = "Airing Schedule — AniDoc";
+  }, []);
 
   // Helper for time conversion
   const getLocalTime = (broadcast) => {

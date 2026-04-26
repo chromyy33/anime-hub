@@ -205,6 +205,7 @@ export default function SearchPage() {
 
   // ── Fetch results ────────────────────────────────────────────────────
   useEffect(() => {
+    document.title = query ? `Results for "${query}" — AniDoc` : "Browse Anime — AniDoc";
     if (!query && !urlGenres && !urlType && !urlStatus && urlMinScore === 0 && !urlYear) return;
     setLoading(true);
     setResults([]);

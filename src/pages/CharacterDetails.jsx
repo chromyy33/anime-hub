@@ -44,6 +44,9 @@ export default function CharacterDetails() {
         ]);
         setData(charRes);
         setPictures(picRes || []);
+        if (charRes) {
+          document.title = `${charRes.name} — AniDoc`;
+        }
         
         // Auto-select first available language if Japanese isn't found
         if (charRes?.voices) {

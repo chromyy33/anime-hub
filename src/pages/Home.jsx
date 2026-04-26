@@ -180,6 +180,7 @@ export default function Home() {
 
   // 1. Initial data load
   useEffect(() => {
+    document.title = "AniDoc — Your Ultimate Anime Hub";
     setTimeout(() => setLoadingWatchlist(false), 800);
     let cancelled = false;
 

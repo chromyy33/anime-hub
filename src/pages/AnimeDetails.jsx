@@ -48,6 +48,9 @@ export default function AnimeDetails() {
         if (!res.ok) throw new Error();
         const full = await res.json();
         setAnime(full.data);
+        if (full.data) {
+          document.title = `${full.data.title_english || full.data.title} — AniDoc`;
+        }
         setLoading(false);
 
         // Step 2: Background secondary data (staggered for rate limits)
