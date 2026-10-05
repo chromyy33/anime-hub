@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, Clock } from 'lucide-react';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from './WatchlistButton';
+import styles from './AnimeCard.module.css';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -21,53 +22,40 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
     navigate(`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
-
   // Grid Variant (Used in Search/Home)
   if (variant === 'grid') {
     return (
       <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style}>
-        <Link to={`/anime/${anime.mal_id}`} className="card-interactive" style={{ textDecoration: 'none', display: 'block', position: 'relative' }}>
+        <Link to={`/anime/${anime.mal_id}`} className={styles.gridCardLink}>
           
           {/* Quick Add Button */}
-          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 150 }}>
+          <div className={styles.watchlistBtnWrap}>
             <WatchlistButton anime={anime} variant="icon" />
           </div>
 
-          <div className="card-img-wrap">
-            <img src={anime.images?.jpg?.large_image_url} alt={anime.title} className="card-img" />
+          <div className={styles.cardImgWrap}>
+            <img src={anime.images?.jpg?.large_image_url} alt={anime.title} className={styles.cardImg} />
             {anime.score && (
-              <span className="badge anime-card__badge-score" style={{ 
-                position: 'absolute', top: 10, right: 10, zIndex: 5
-              }}>
+              <span className={styles.scoreBadge}>
                 <Star size={11} fill="var(--primary)" color="var(--primary)" /> {anime.score}
               </span>
             )}
             {anime.type && (
-              <span style={{ 
-                position: 'absolute', bottom: 8, left: 8, 
-                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', 
-                padding: '0 10px', borderRadius: 4, height: 28,
-                background: 'rgba(15, 23, 42, 0.8)', color: '#fff', 
-                border: '1px solid var(--badge-border)',
-                backdropFilter: 'blur(12px)', letterSpacing: '0.04em',
-                display: 'flex', alignItems: 'center', zIndex: 5
-              }}>
+              <span className={styles.typeBadge}>
                 {anime.type}
               </span>
             )}
           </div>
-          <div style={{ padding: '14px 12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>
+          <div className={styles.gridInfo}>
+            <h3 className={styles.gridTitle}>
               {anime.title_english || anime.title}
             </h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>{anime.year || anime.type || 'TBA'}</span>
+            <div className={styles.gridMetaRow}>
+              <span className={styles.gridMetaYear}>{anime.year || anime.type || 'TBA'}</span>
               {anime.genres?.[0] && (
                 <span 
                   onClick={(e) => handleGenreClick(e, anime.genres[0])}
-                  style={{ fontSize: 11, color: 'var(--primary)', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-                  onMouseOver={e => e.currentTarget.style.background = 'rgba(16,185,129,0.2)'}
-                  onMouseOut={e => e.currentTarget.style.background = 'rgba(16,185,129,0.1)'}
+                  className={styles.genreChip}
                 >
                   {anime.genres[0].name}
                 </span>
@@ -82,41 +70,35 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
   // List Variant (Used in Schedule)
   return (
     <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style}>
-      <Link to={`/anime/${anime.mal_id}`} className="card-interactive" 
-        style={{ 
-          textDecoration: 'none', display: 'flex', gap: 16, padding: 14, 
-          background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)',
-          position: 'relative', opacity: anime.airing === false ? 0.6 : 1
-        }}>
+      <Link to={`/anime/${anime.mal_id}`} className={styles.listCardLink} 
+        style={{ opacity: anime.airing === false ? 0.6 : 1 }}>
         
         {/* Quick Add Button */}
-        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
+        <div className={styles.listWatchlistBtnWrap}>
           <WatchlistButton anime={anime} variant="icon" />
         </div>
 
-        <div style={{ width: 85, height: 115, flexShrink: 0 }}>
-            <img src={anime.images?.jpg?.image_url} alt={anime.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} />
+        <div className={styles.listImgWrap}>
+            <img src={anime.images?.jpg?.image_url} alt={anime.title} className={styles.listImg} />
         </div>
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <div className={styles.listInfo}>
+            <div className={styles.listTimeRow}>
                 <Clock size={12} color="var(--primary)" />
-                <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--primary)' }}>
+                <span className={styles.listTime}>
                     {anime.local?.time || anime.broadcast?.time || 'TBA'}
                 </span>
-                {anime.local && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>(Local)</span>}
-                {anime.airing === false && <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-base)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto' }}>FINISHED</span>}
+                {anime.local && <span className={styles.listTimeMeta}>(Local)</span>}
+                {anime.airing === false && <span className={styles.listFinishedBadge}>FINISHED</span>}
             </div>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <h3 className={styles.listTitle}>
                 {anime.title_english || anime.title}
             </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div className={styles.listGenreRow}>
                 {anime.genres?.slice(0, 3).map(g => (
                     <span 
                       key={g.mal_id} 
                       onClick={(e) => handleGenreClick(e, g)}
-                      style={{ fontSize: 11, color: 'var(--primary)', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-                      onMouseOver={e => e.currentTarget.style.background = 'rgba(16,185,129,0.2)'}
-                      onMouseOut={e => e.currentTarget.style.background = 'rgba(16,185,129,0.1)'}
+                      className={styles.genreChip}
                     >
                         {g.name}
                     </span>
@@ -127,3 +109,4 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
     </motion.div>
   );
 }
+

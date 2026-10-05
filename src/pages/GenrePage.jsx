@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
+import { searchAnime } from '../utils/anilist';
 
 export default function GenrePage() {
   const { id, name } = useParams();
@@ -14,19 +15,38 @@ export default function GenrePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const genreName = name
+    ? name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : (isNaN(Number(id)) ? id : 'Action');
+
   useEffect(() => {
     setError(null);
     setLoading(true);
-    fetch(`https://api.jikan.moe/v4/anime?genres=${id}&order_by=score&sort=desc&limit=24&page=${page}`)
-      .then(r => r.json())
+    let cancelled = false;
+
+    searchAnime({
+      genre: genreName,
+      sort: 'SCORE_DESC',
+      page,
+      perPage: 24
+    })
       .then(data => {
-        setResults(data.data || []);
-        setPagination(data.pagination || null);
-        setLoading(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!cancelled) {
+          setResults(data.results || []);
+          setPagination(data.pagination || null);
+          setLoading(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       })
-      .catch(() => { setError('Failed to load results.'); setLoading(false); });
-  }, [id, page]);
+      .catch(() => {
+        if (!cancelled) {
+          setError('Failed to load results.');
+          setLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [genreName, page]);
 
   const goToPage = (p) => {
     setSearchParams({ page: p });

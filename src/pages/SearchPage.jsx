@@ -4,28 +4,34 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, SearchX, ChevronLeft, ChevronRight, SlidersHorizontal, X, Check, ChevronDown } from 'lucide-react';
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
+import { searchAnime } from '../utils/anilist';
 
-// ─── Popular genres (curated) ─────────────────────────────────────────
-const POPULAR_GENRES = [
-  { mal_id: 1,  name: 'Action' },
-  { mal_id: 2,  name: 'Adventure' },
-  { mal_id: 4,  name: 'Comedy' },
-  { mal_id: 8,  name: 'Drama' },
-  { mal_id: 10, name: 'Fantasy' },
-  { mal_id: 14, name: 'Horror' },
-  { mal_id: 7,  name: 'Mystery' },
-  { mal_id: 22, name: 'Romance' },
-  { mal_id: 24, name: 'Sci-Fi' },
-  { mal_id: 36, name: 'Slice of Life' },
-  { mal_id: 30, name: 'Sports' },
-  { mal_id: 37, name: 'Supernatural' },
-  { mal_id: 41, name: 'Suspense' },
-  { mal_id: 18, name: 'Mecha' },
-  { mal_id: 40, name: 'Psychological' },
-  { mal_id: 27, name: 'Shounen' },
-  { mal_id: 25, name: 'Shoujo' },
-  { mal_id: 42, name: 'Seinen' },
+// ─── Popular genres (AniList compatible) ──────────────────────────────
+export const POPULAR_GENRES = [
+  { id: 'Action', name: 'Action' },
+  { id: 'Adventure', name: 'Adventure' },
+  { id: 'Comedy', name: 'Comedy' },
+  { id: 'Drama', name: 'Drama' },
+  { id: 'Fantasy', name: 'Fantasy' },
+  { id: 'Horror', name: 'Horror' },
+  { id: 'Mahou Shoujo', name: 'Mahou Shoujo' },
+  { id: 'Mecha', name: 'Mecha' },
+  { id: 'Music', name: 'Music' },
+  { id: 'Mystery', name: 'Mystery' },
+  { id: 'Psychological', name: 'Psychological' },
+  { id: 'Romance', name: 'Romance' },
+  { id: 'Sci-Fi', name: 'Sci-Fi' },
+  { id: 'Slice of Life', name: 'Slice of Life' },
+  { id: 'Sports', name: 'Sports' },
+  { id: 'Supernatural', name: 'Supernatural' },
+  { id: 'Thriller', name: 'Thriller' },
 ];
+
+export const JIKAN_TO_ANILIST_GENRES = {
+  '1': 'Action', '2': 'Adventure', '4': 'Comedy', '8': 'Drama', '10': 'Fantasy',
+  '14': 'Horror', '7': 'Mystery', '22': 'Romance', '24': 'Sci-Fi', '36': 'Slice of Life',
+  '30': 'Sports', '37': 'Supernatural', '41': 'Thriller', '18': 'Mecha', '40': 'Psychological'
+};
 
 // ─── Animation variants ────────────────────────────────────────────────
 const fadeUp = {
@@ -35,9 +41,10 @@ const fadeUp = {
 
 // ─── Genre multi-select pill ───────────────────────────────────────────
 function GenrePill({ genre, selected, onToggle }) {
+  const gId = genre.id || genre.name;
   return (
     <button
-      onClick={() => onToggle(genre.mal_id)}
+      onClick={() => onToggle(gId)}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4,
         padding: '4px 10px', borderRadius: 99, fontSize: 12, fontWeight: 500,
@@ -165,7 +172,10 @@ export default function SearchPage() {
   const urlYear   = searchParams.get('start_date') ? searchParams.get('start_date').slice(0, 4) : '';
 
   // ── Local filter state (drafts until Apply) ─────────────────────────
-  const [selectedGenres, setSelectedGenres] = useState(() => urlGenres ? urlGenres.split(',').map(Number) : []);
+  const [selectedGenres, setSelectedGenres] = useState(() => {
+    if (!urlGenres) return [];
+    return urlGenres.split(',').map(g => JIKAN_TO_ANILIST_GENRES[g] || g);
+  });
   const [type,     setType]     = useState(urlType);
   const [status,   setStatus]   = useState(urlStatus);
   const [sort,     setSort]     = useState(urlSort);
@@ -188,38 +198,42 @@ export default function SearchPage() {
     sort !== 'score',
   ].filter(Boolean).length;
 
-  // ── Build API URL from current URL params ────────────────────────────
-  const buildUrl = useCallback(() => {
-    const params = new URLSearchParams();
-    if (query)    params.set('q', query);
-    if (urlGenres) params.set('genres', urlGenres);
-    if (urlType)   params.set('type', urlType);
-    if (urlStatus) params.set('status', urlStatus);
-    params.set('order_by', urlSort);
-    params.set('sort', 'desc');
-    if (urlMinScore > 0) params.set('min_score', urlMinScore);
-    if (urlYear)   { params.set('start_date', `${urlYear}-01-01`); params.set('end_date', `${urlYear}-12-31`); }
-    params.set('limit', '24');
-    params.set('page', page);
-    params.set('sfw', 'true');
-    return `https://api.jikan.moe/v4/anime?${params.toString()}`;
-  }, [query, urlGenres, urlType, urlStatus, urlSort, urlMinScore, urlYear, page]);
-
   // ── Fetch results ────────────────────────────────────────────────────
   useEffect(() => {
-    if (!query && !urlGenres && !urlType && !urlStatus && urlMinScore === 0 && !urlYear) return;
     setError(null);
     setLoading(true);
-    setResults([]);
-    fetch(buildUrl())
-      .then(r => r.json())
+    let cancelled = false;
+
+    const genreStr = urlGenres
+      ? (JIKAN_TO_ANILIST_GENRES[urlGenres] || urlGenres.split(',')[0])
+      : '';
+
+    searchAnime({
+      query,
+      genre: genreStr,
+      format: urlType,
+      status: urlStatus,
+      sort: urlSort,
+      minScore: urlMinScore,
+      year: urlYear,
+      page
+    })
       .then(data => {
-        setResults(data.data || []);
-        setPagination(data.pagination || null);
-        setLoading(false);
+        if (!cancelled) {
+          setResults(data.results || []);
+          setPagination(data.pagination || null);
+          setLoading(false);
+        }
       })
-      .catch(() => { setError('Search failed. Please try again.'); setLoading(false); });
-  }, [buildUrl]);
+      .catch((err) => {
+        if (!cancelled) {
+          setError('Search failed. Please try again.');
+          setLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [query, urlGenres, urlType, urlStatus, urlSort, urlMinScore, urlYear, page]);
 
   // ── Apply filters → update URL (resets to page 1) ───────────────────
   const applyFilters = () => {
@@ -365,7 +379,7 @@ export default function SearchPage() {
                 </div>
                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 140, overflowY: 'auto', paddingRight: 4 }}>
                   {POPULAR_GENRES.map(g => (
-                    <GenrePill key={g.mal_id} genre={g} selected={selectedGenres.includes(g.mal_id)} onToggle={toggleGenre} />
+                    <GenrePill key={g.id} genre={g} selected={selectedGenres.includes(g.id)} onToggle={toggleGenre} />
                   ))}
                 </div>
               </div>
@@ -395,7 +409,8 @@ export default function SearchPage() {
           {urlYear && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Year: {urlYear}</span>}
           {urlSort !== 'score' && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Sort: {urlSort}</span>}
           {urlGenres && urlGenres.split(',').map(gid => {
-            const g = POPULAR_GENRES.find(x => x.mal_id === Number(gid));
+            const resolved = JIKAN_TO_ANILIST_GENRES[gid] || gid;
+            const g = POPULAR_GENRES.find(x => x.id === resolved || x.name === resolved);
             return g ? <span key={gid} className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>{g.name}</span> : null;
           })}
         </div>

@@ -1,0 +1,86 @@
+.carouselContainer {
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.sliderWrapper {
+  position: relative;
+}
+
+.horizontalScroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 250px; /* Room for dropdowns */
+  margin-bottom: -250px;
+  padding-top: 8px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 var(--spacing-lg);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.horizontalScroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+@media (max-width: 768px) {
+  .horizontalScroll {
+    scroll-padding: 0 var(--spacing-md);
+  }
+}
+
+.sliderBtn {
+  position: absolute;
+  top: 150px;
+  transform: translateY(-50%);
+  z-index: 200;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.sliderBtn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.sliderBtn.left {
+  left: -22px;
+}
+
+.sliderBtn.right {
+  right: -22px;
+}
+
+@media (max-width: 1100px) {
+  .sliderBtn.left {
+    left: -10px;
+  }
+  .sliderBtn.right {
+    right: -10px;
+  }
+  .sliderBtn {
+    width: 38px;
+    height: 38px;
+  }
+}

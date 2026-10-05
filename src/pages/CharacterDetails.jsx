@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ArrowLeft, Star, Film, Mic2, Info, ChevronRight, Download } from 'lucide-react';
-import { fetchCached } from '../utils/cache';
+import { fetchCharacterDetails } from '../utils/anilist';
 import SEO from '../components/SEO';
 import GalleryModal from '../components/GalleryModal';
 
@@ -38,31 +38,32 @@ export default function CharacterDetails() {
   const [activeLang, setActiveLang] = useState('Japanese');
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const [charRes, picRes] = await Promise.all([
-          fetchCached(`https://api.jikan.moe/v4/characters/${id}/full`, `char_full_${id}`),
-          fetchCached(`https://api.jikan.moe/v4/characters/${id}/pictures`, `char_pics_${id}`)
-        ]);
-        setData(charRes);
-        setPictures(picRes || []);
-        
-        // Auto-select first available language if Japanese isn't found
-        if (charRes?.voices) {
-            const langs = [...new Set(charRes.voices.map(v => v.language))];
-            if (!langs.includes('Japanese') && langs.length > 0) {
-                setActiveLang(langs[0]);
+        const res = await fetchCharacterDetails(id);
+        if (cancelled) return;
+        if (res && res.character) {
+          setData(res.character);
+          setPictures(res.pictures || []);
+          
+          if (res.character.voices && res.character.voices.length > 0) {
+            const langs = [...new Set(res.character.voices.map(v => v.language))];
+            if (!langs.includes('Japanese')) {
+              setActiveLang(langs[0]);
             }
+          }
         }
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     load();
     window.scrollTo(0, 0);
+    return () => { cancelled = true; };
   }, [id]);
 
   const voiceLangs = useMemo(() => {

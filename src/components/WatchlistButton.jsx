@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookmarkPlus, Check, Eye, Clock, ChevronDown, Trash2, MoreHorizontal } from 'lucide-react';
 import { useWatchlist } from '../context/WatchlistContext';
+import styles from './WatchlistButton.module.css';
 
 const STATUS_CONFIG = {
   plan:      { label: 'Plan to Watch', Icon: Clock },
@@ -33,24 +34,14 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
 
   if (!anime) return null;
 
-  // ── Colour tokens by status ──
-  const statusStyle = !inList ? {
-    border: isBadge ? 'none' : '1px solid var(--border-strong)',
-    bg: isBadge ? 'var(--status-plan-bg)' : 'var(--bg-surface)',
-    color: isBadge ? '#fff' : 'var(--text-secondary)',
-  } : entry.status === 'completed' ? {
-    border: isBadge ? 'none' : '1px solid var(--primary)',
-    bg: 'var(--primary)',
-    color: '#fff',
-  } : entry.status === 'watching' ? {
-    border: isBadge ? 'none' : '1px solid var(--border-strong)',
-    bg: 'var(--status-watching-bg)',
-    color: 'var(--status-watching-color)',
-  } : {
-    border: isBadge ? 'none' : '1px solid var(--border-strong)',
-    bg: isBadge ? 'var(--status-plan-bg)' : 'var(--bg-surface-hover)',
-    color: isBadge ? '#fff' : 'var(--text-primary)',
-  };
+  // ── Compute status classes ──
+  const statusClass = !inList
+    ? styles.statusDefault
+    : entry.status === 'completed'
+    ? styles.statusCompleted
+    : entry.status === 'watching'
+    ? styles.statusWatching
+    : styles.statusPlan;
 
   const cfg = entry ? STATUS_CONFIG[entry.status] : null;
   const StatusIcon = (isIcon && inList) || isDots ? MoreHorizontal : (cfg?.Icon ?? BookmarkPlus);
@@ -76,40 +67,17 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   };
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'flex', width: isBadge ? '100%' : 'inline-flex' }}>
+    <div ref={ref} className={`${styles.container} ${isBadge ? styles.isBadge : ''}`}>
       {isIcon || isDots ? (
         <button
           onClick={handleDirectClick}
           title={inList ? `Watchlist: ${cfg?.label}` : 'Add to Watchlist'}
-          style={{
-            width: 28, height: 28, borderRadius: 6,
-            background: 'rgba(0,0,0,0.6)', 
-            color: '#fff',
-            border: '1px solid var(--badge-border)', 
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(12px)', transition: 'all 0.2s',
-          }}
+          className={styles.iconBtn}
         >
           <StatusIcon size={14} strokeWidth={inList && !isDots ? 3 : 2} />
         </button>
       ) : isBadge ? (
-        <div
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            height: 30, width: '100%',
-            background: statusStyle.bg,
-            color: statusStyle.color,
-            fontWeight: 800, fontSize: 10,
-            fontFamily: 'Plus Jakarta Sans, sans-serif',
-            whiteSpace: 'nowrap',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            pointerEvents: 'none',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-          }}
-        >
+        <div className={`${styles.badgeState} ${statusClass} ${styles.isBadgeState}`}>
           <StatusIcon size={12} />
           {inList ? cfg.label : 'Add to Watchlist'}
         </div>
@@ -118,46 +86,19 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
           {/* ─── 70% left: action label ─── */}
           <button
             onClick={handleDirectClick}
-            style={{
-              display: 'flex', alignItems: 'center', gap: isMinimal ? 6 : 8,
-              height: isMinimal ? 32 : 40, padding: isMinimal ? '0 10px' : '0 16px',
-              borderRadius: `var(--radius-sm) 0 0 var(--radius-sm)`,
-              border: statusStyle.border,
-              borderRight: 'none',
-              background: statusStyle.bg,
-              color: statusStyle.color,
-              fontWeight: 700, fontSize: isMinimal ? 11 : 14, cursor: 'pointer',
-              transition: 'all 0.18s',
-              fontFamily: 'Plus Jakarta Sans, sans-serif',
-              whiteSpace: 'nowrap',
-              textTransform: isMinimal ? 'uppercase' : 'none',
-              letterSpacing: isMinimal ? '0.04em' : 'normal',
-              minWidth: isMinimal ? 100 : 140,
-              justifyContent: 'center'
-            }}
+            className={`${styles.btnLeft} ${isMinimal ? styles.isMinimal : ''} ${statusClass}`}
           >
             <StatusIcon size={isMinimal ? 13 : 15} />
             {inList ? cfg.label : 'Add to Watchlist'}
           </button>
 
           {/* Divider line */}
-          <div style={{ width: 1, background: 'var(--border-strong)', flexShrink: 0, alignSelf: 'stretch' }} />
+          <div className={styles.divider} />
 
           {/* ─── 30% right: chevron opens dropdown ─── */}
           <button
             onClick={toggleDropdown}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: isMinimal ? 28 : 36, height: isMinimal ? 32 : 40,
-              borderRadius: `0 var(--radius-sm) var(--radius-sm) 0`,
-              border: statusStyle.border,
-              borderLeft: 'none',
-              background: statusStyle.bg,
-              color: statusStyle.color,
-              cursor: 'pointer',
-              transition: 'all 0.18s',
-              flexShrink: 0,
-            }}
+            className={`${styles.btnRight} ${isMinimal ? styles.isMinimal : ''} ${statusClass}`}
             aria-label="Open watchlist options"
             aria-expanded={open}
           >
@@ -174,24 +115,16 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            style={{
-              position: 'absolute', 
-              top: 'calc(100% + 8px)', 
-              bottom: 'unset',
-              left: 0, 
-              zIndex: 1000,
-              background: `linear-gradient(165deg, rgba(255, 255, 255, 0.1), transparent), var(--bg-elevated)`,
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              border: '1px solid var(--badge-border)',
-              boxShadow: '0 12px 40px -8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1)',
-              borderRadius: 'var(--radius-md)',
-              width: 210, overflow: 'hidden',
+            className={styles.dropdownMenu}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
             }}
+            onMouseDown={e => e.stopPropagation()}
           >
             {/* Status options */}
             <div style={{ padding: '8px 0' }}>
-              <div style={{ padding: '6px 14px 6px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-tertiary)' }}>
+              <div className={styles.dropdownHeader}>
                 {inList ? 'Update Status' : 'Add to list as…'}
               </div>
               {Object.entries(STATUS_CONFIG).map(([key, { label, Icon }]) => {
@@ -200,17 +133,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                   <button
                     key={key}
                     onClick={(e) => handleStatusSelect(e, key)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '9px 14px', border: 'none', cursor: 'pointer',
-                      background: isActive ? 'rgba(16,185,129,0.08)' : 'transparent',
-                      fontSize: 13, fontWeight: isActive ? 600 : 400,
-                      color: isActive ? 'var(--primary)' : 'var(--text-primary)',
-                      textAlign: 'left', transition: 'background 0.1s',
-                      fontFamily: 'Plus Jakarta Sans, sans-serif',
-                    }}
-                    onMouseOver={e => { if (!isActive) e.currentTarget.style.background = 'rgba(16,185,129,0.12)'; }}
-                    onMouseOut={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                    className={`${styles.statusOptionBtn} ${isActive ? styles.statusOptionBtnActive : ''}`}
                   >
                     <Icon size={14} color={isActive ? 'var(--primary)' : 'var(--text-tertiary)'} aria-hidden="true" />
                     {label}
@@ -222,12 +145,12 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
 
             {/* Rating slider */}
             {inList && (
-              <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-tertiary)' }}>
+              <div className={styles.ratingSection}>
+                <div className={styles.ratingHeader}>
+                  <span className={styles.ratingTitle}>
                     Your Rating
                   </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: sliderVal > 0 ? 'var(--primary)' : 'var(--text-tertiary)' }}>
+                  <span className={`${styles.ratingVal} ${sliderVal > 0 ? styles.hasRating : ''}`}>
                     {sliderVal > 0 ? `${sliderVal} / 10` : 'Not rated'}
                   </span>
                 </div>
@@ -241,11 +164,11 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                     setSliderVal(v);
                     setUserRating(anime.mal_id, v > 0 ? v : null);
                   }}
-                  style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer', outline: 'none', display: 'block' }}
+                  className={styles.ratingSlider}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                <div className={styles.ratingTicks}>
                   {[0, 5, 10].map(n => (
-                    <span key={n} style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{n}</span>
+                    <span key={n} className={styles.ratingTickLabel}>{n}</span>
                   ))}
                 </div>
               </div>
@@ -253,7 +176,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
 
             {/* Delete */}
             {inList && (
-              <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '6px 8px' }}>
+              <div className={styles.removeSection}>
                 <button
                   onClick={(e) => { 
                     e.preventDefault();
@@ -261,15 +184,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                     removeFromList(anime.mal_id); 
                     setOpen(false); 
                   }}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '8px 10px', background: 'transparent', border: 'none',
-                    cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12,
-                    borderRadius: 4, transition: 'all 0.12s',
-                    fontFamily: 'Plus Jakarta Sans, sans-serif',
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = 'rgb(239,68,68)'; }}
-                  onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+                  className={styles.removeBtn}
                 >
                   <Trash2 size={13} /> Remove from list
                 </button>
@@ -281,3 +196,4 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     </div>
   );
 }
+

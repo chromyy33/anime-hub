@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Calendar, Star, Play, Sword, Heart, Trophy, BookOpen, ChevronLeft, ChevronRight, LayoutGrid, Zap } from 'lucide-react';
 import AnimeCard from '../components/AnimeCard';
 import Carousel from '../components/Carousel';
-import { fetchCached, sleep } from '../utils/cache';
+import { fetchHomeData, fetchAnimeDetails } from '../utils/anilist';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from '../components/WatchlistButton';
 import SEO from '../components/SEO';
@@ -186,48 +186,24 @@ export default function Home() {
       setLoading(true);
       setErrorMsg('');
       try {
-        const seenIds = new Set();
-        const dedupeSection = (arr) => {
-          if (!arr) return [];
-          return arr.filter(item => {
-            if (seenIds.has(item.mal_id)) return false;
-            seenIds.add(item.mal_id);
-            return true;
-          });
-        };
-
-        const updateSection = (key, data) => {
-          if (!cancelled) {
-            setData(prev => ({ ...prev, [key]: dedupeSection(data) }));
-          }
-        };
-
-        const airingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=airing&limit=15', 'home_airing');
-        updateSection('airing', airingRaw);
-        await sleep(400);
-
-        const upcomingRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?filter=upcoming&limit=15', 'home_upcoming');
-        updateSection('upcoming', upcomingRaw);
-        await sleep(400);
-
-        const topRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?limit=15', 'home_top');
-        updateSection('top', topRaw);
-        await sleep(400);
-
-        const moviesRaw = await fetchCached('https://api.jikan.moe/v4/top/anime?type=movie&limit=15', 'home_movies');
-        updateSection('movies', moviesRaw);
-        await sleep(400);
-
-        const actionRaw = await fetchCached('https://api.jikan.moe/v4/anime?genres=1&order_by=score&sort=desc&limit=15', 'home_action');
-        updateSection('action', actionRaw);
-        await sleep(400);
-
-        const romanceRaw = await fetchCached('https://api.jikan.moe/v4/anime?genres=22&order_by=score&sort=desc&limit=15', 'home_romance');
-        updateSection('romance', romanceRaw);
-
-        if (!cancelled) setLoading(false);
+        const homeData = await fetchHomeData();
+        if (!cancelled) {
+          setData(prev => ({
+            ...prev,
+            airing: homeData.airing || [],
+            upcoming: homeData.upcoming || [],
+            top: homeData.top || [],
+            movies: homeData.movies || [],
+            action: homeData.action || [],
+            romance: homeData.romance || []
+          }));
+          setLoading(false);
+        }
       } catch (err) {
-        if (!cancelled) { setErrorMsg(err.message); setLoading(false); }
+        if (!cancelled) {
+          setErrorMsg(err.message || 'Failed to load anime data');
+          setLoading(false);
+        }
       }
     };
     load();
@@ -239,49 +215,32 @@ export default function Home() {
     if (allEntries.length === 0 || data.recommended.length > 0 || loading) return;
 
     const loadRecs = async () => {
-        setLoadingRecs(true);
-        try {
-            const sorted = [...allEntries].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
-            const primary = sorted.find(a => a.status === 'watching') || sorted[0];
-            
-            const recRes = await fetchCached(`https://api.jikan.moe/v4/anime/${primary.mal_id}/recommendations`, `home_recs_${primary.mal_id}`);
-            const rawList = recRes?.filter(r => r?.entry).slice(0, 12) || [];
-            
-            // Collect all IDs currently shown in other sections to filter them out
-            const displayedIds = new Set([
-              ...data.airing.map(a => a.mal_id),
-              ...data.upcoming.map(a => a.mal_id),
-              ...data.top.map(a => a.mal_id),
-              ...data.movies.map(a => a.mal_id),
-              ...data.action.map(a => a.mal_id),
-              ...data.romance.map(a => a.mal_id),
-              ...allEntries.map(a => a.mal_id)
-            ]);
+      setLoadingRecs(true);
+      try {
+        const sorted = [...allEntries].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+        const primary = sorted.find(a => a.status === 'watching') || sorted[0];
+        
+        const details = await fetchAnimeDetails(primary.mal_id);
+        const rawList = (details?.recommendations || []).map(r => r.entry).filter(Boolean);
+        
+        // Collect all IDs currently shown in other sections to filter them out
+        const displayedIds = new Set([
+          ...data.airing.map(a => a.mal_id),
+          ...data.upcoming.map(a => a.mal_id),
+          ...data.top.map(a => a.mal_id),
+          ...data.movies.map(a => a.mal_id),
+          ...data.action.map(a => a.mal_id),
+          ...data.romance.map(a => a.mal_id),
+          ...allEntries.map(a => a.mal_id)
+        ]);
 
-            const enrichedList = [];
-            for (const rec of rawList) {
-                if (displayedIds.has(rec.entry.mal_id)) continue;
-                if (enrichedList.length >= 8) break;
-
-                try {
-                    const fullData = await fetchCached(`https://api.jikan.moe/v4/anime/${rec.entry.mal_id}`, `anime_full_${rec.entry.mal_id}`);
-                    if (fullData) enrichedList.push(fullData);
-                    await sleep(400); 
-                } catch (e) {
-                    enrichedList.push({
-                        mal_id: rec.entry.mal_id,
-                        title: rec.entry.title,
-                        images: rec.entry.images,
-                    });
-                }
-            }
-
-            setData(prev => ({ ...prev, recommended: enrichedList, recSource: primary.title }));
-        } catch (err) {
-            console.error('Failed to load recommendations', err);
-        } finally {
-            setLoadingRecs(false);
-        }
+        const filtered = rawList.filter(item => !displayedIds.has(item.mal_id)).slice(0, 10);
+        setData(prev => ({ ...prev, recommended: filtered, recSource: primary.title }));
+      } catch (err) {
+        console.error('Failed to load recommendations', err);
+      } finally {
+        setLoadingRecs(false);
+      }
     };
     loadRecs();
   }, [allEntries, data.recommended.length, loading, data.airing, data.upcoming, data.top, data.movies, data.action, data.romance]);

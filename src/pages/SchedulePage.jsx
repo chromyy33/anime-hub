@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Download, ArrowRight, Search, LayoutGrid, Info, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { fetchCached } from '../utils/cache';
+import { fetchWeeklySchedule } from '../utils/anilist';
 import { useWatchlist } from '../context/WatchlistContext';
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
@@ -56,28 +56,24 @@ export default function SchedulePage() {
 
   // Fetch full schedule once
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const allDaysData = await Promise.all(DAYS.map(day => 
-            fetchCached(`https://api.jikan.moe/v4/schedules?filter=${day}`, `sched_${day}`)
-        ));
-        
-        const grouped = {};
-        DAYS.forEach((day, i) => {
-            grouped[day] = allDaysData[i].map(item => ({
-                ...item,
-                local: getLocalTime(item.broadcast)
-            }));
-        });
-        setScheduleData(grouped);
+        const grouped = await fetchWeeklySchedule();
+        if (!cancelled) {
+          setScheduleData(grouped);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Schedule load error:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
     load();
+    return () => { cancelled = true; };
   }, []);
 
   const activeList = useMemo(() => {

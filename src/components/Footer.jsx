@@ -1,22 +1,23 @@
 import { Link } from 'react-router-dom';
 import { ExternalLink, Heart, Sparkles, Terminal } from 'lucide-react';
+import styles from './Footer.module.css';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="footer">
-      <div className="footer-container">
+    <footer className={styles.footer}>
+      <div className={styles.footerContainer}>
         
         {/* Brand Section */}
-        <div className="footer-brand">
-          <Link to="/" className="footer-logo" style={{ textDecoration: 'none' }}>
-            <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className={styles.footerBrand}>
+          <Link to="/" className={styles.footerLogo}>
+            <div className={styles.footerLogoBox}>
               <Sparkles size={18} color="#fff" fill="#fff" aria-hidden="true" />
             </div>
-            ANI<span style={{ color: 'var(--primary)' }}>DOC</span>
+            ANI<span className={styles.footerLogoAccent}>DOC</span>
           </Link>
-          <p className="footer-desc">
+          <p className={styles.footerDesc}>
             A premium anime tracking experience built for the modern fan. 
             Discover, track, and manage your watchlist with ease.
           </p>
@@ -24,18 +25,18 @@ export default function Footer() {
 
         {/* Quick Links Section */}
         <div>
-          <h4 className="footer-section-title">Navigation</h4>
-          <ul className="footer-links-list">
-            <li><Link to="/" className="footer-link">Home</Link></li>
-            <li><Link to="/search" className="footer-link">Browse Anime</Link></li>
-            <li><Link to="/schedule" className="footer-link">Airing Schedule</Link></li>
+          <h4 className={styles.footerSectionTitle}>Navigation</h4>
+          <ul className={styles.footerLinksList}>
+            <li><Link to="/" className={styles.footerLink}>Home</Link></li>
+            <li><Link to="/search" className={styles.footerLink}>Browse Anime</Link></li>
+            <li><Link to="/schedule" className={styles.footerLink}>Airing Schedule</Link></li>
           </ul>
         </div>
 
         {/* Credits Section */}
-        <div className="footer-credits">
-          <h4 className="footer-section-title">Credits</h4>
-          <div className="credit-item">
+        <div className={styles.footerCredits}>
+          <h4 className={styles.footerSectionTitle}>Credits</h4>
+          <div className={styles.creditItem}>
             <span>Made with</span>
             <Heart size={14} fill="#ef4444" color="#ef4444" aria-hidden="true" />
             <span>by</span>
@@ -43,36 +44,35 @@ export default function Footer() {
               href="https://github.com/chromyy33" 
               target="_blank" 
               rel="noreferrer"
-              className="footer-link"
-              style={{ fontWeight: 700, color: 'var(--text-primary)' }}
+              className={`${styles.footerLink} ${styles.footerCreditLink}`}
             >
-              chromyy33 <ExternalLink size={12} style={{ opacity: 0.5 }} aria-hidden="true" />
+              chromyy33 <ExternalLink size={12} className={styles.footerCreditLinkIcon} aria-hidden="true" />
             </a>
           </div>
-          <div className="credit-item">
+          <div className={styles.creditItem}>
             <span>Co-coded with</span>
             <a 
               href="https://antigravity.google/" 
               target="_blank" 
               rel="noreferrer"
-              className="footer-link"
-              style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4 }}
+              className={`${styles.footerLink} ${styles.footerCreditLinkAccent}`}
             >
               <Terminal size={12} aria-hidden="true" /> ANTIGRAVITY
             </a>
           </div>
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.6 }}>
-            Icons by <a href="https://lucide.dev/" target="_blank" rel="noreferrer" className="footer-link" style={{ textDecoration: 'underline', fontSize: 'inherit' }}>Lucide</a>. 
-            Data by <a href="https://jikan.moe/" target="_blank" rel="noreferrer" className="footer-link" style={{ textDecoration: 'underline', fontSize: 'inherit' }}>Jikan API</a>.
+          <p className={styles.footerLegalText}>
+            Icons by <a href="https://lucide.dev/" target="_blank" rel="noreferrer" className={`${styles.footerLink} ${styles.footerLinkUnderline}`}>Lucide</a>. 
+            Data by <a href="https://anilist.co/" target="_blank" rel="noreferrer" className={`${styles.footerLink} ${styles.footerLinkUnderline}`}>AniList API</a>.
           </p>
         </div>
 
       </div>
 
       {/* Bottom Bar */}
-      <div className="footer-bottom">
+      <div className={styles.footerBottom}>
         <div>© {currentYear} AniDoc. All rights reserved.</div>
       </div>
     </footer>
   );
 }
+

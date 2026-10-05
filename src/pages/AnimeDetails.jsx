@@ -7,6 +7,7 @@ import SEO from '../components/SEO';
 import WatchlistButton from '../components/WatchlistButton';
 import AnimeCard from '../components/AnimeCard';
 import GalleryModal from '../components/GalleryModal';
+import { fetchAnimeDetails } from '../utils/anilist';
 
 function DetailsSkeleton() {
   return (
@@ -42,69 +43,36 @@ export default function AnimeDetails() {
   const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const loadData = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // Step 1: Essential data
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`);
-        if (!res.ok) throw new Error();
-        const full = await res.json();
-        setAnime(full.data);
+        const result = await fetchAnimeDetails(id);
+        if (cancelled) return;
+        if (!result || !result.anime) {
+          setError("Anime not found.");
+          setLoading(false);
+          return;
+        }
+        setAnime(result.anime);
+        setCharacters(result.characters || []);
+        setRecommendations(result.recommendations || []);
+        setPictures(result.pictures || []);
+        setReviews(result.reviews || []);
+        setRelatedDetails(result.relatedDetails || {});
         setLoading(false);
-
-        // Step 2: Background secondary data (staggered for rate limits)
-        setTimeout(async () => {
-            const charRes = await fetch(`https://api.jikan.moe/v4/anime/${id}/characters`);
-            const charJson = await charRes.json();
-            if (charJson.data) setCharacters(charJson.data.sort((a, b) => b.favorites - a.favorites).slice(0, 12));
-        }, 800);
-
-        setTimeout(async () => {
-            const recRes = await fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`);
-            const recJson = await recRes.json();
-            if (recJson.data) setRecommendations(recJson.data.slice(0, 12));
-        }, 1600);
-
-        setTimeout(async () => {
-            const picRes = await fetch(`https://api.jikan.moe/v4/anime/${id}/pictures`);
-            const picJson = await picRes.json();
-            if (picJson.data) setPictures(picJson.data);
-        }, 2400);
-
-        setTimeout(async () => {
-            const revRes = await fetch(`https://api.jikan.moe/v4/anime/${id}/reviews`);
-            const revJson = await revRes.json();
-            if (revJson.data) setReviews(revJson.data.slice(0, 5));
-        }, 3200);
-
       } catch (err) {
-        setError("Failed to load anime metadata. Jikan API might be rate-limiting.");
-        setLoading(false);
+        if (!cancelled) {
+          setError("Failed to load anime metadata. Please try again.");
+          setLoading(false);
+        }
       }
     };
     loadData();
     window.scrollTo(0, 0);
+    return () => { cancelled = true; };
   }, [id]);
-
-  // Fetch poster/score/synopsis for prequel & sequel entries
-  useEffect(() => {
-    if (!anime?.relations) return;
-    const RICH = ['Prequel', 'Sequel', 'Parent Story', 'Full Story'];
-    const toFetch = [];
-    anime.relations.forEach(rel => {
-      if (RICH.includes(rel.relation)) {
-        rel.entry.filter(e => e.type === 'anime').forEach(e => toFetch.push(e.mal_id));
-      }
-    });
-    toFetch.forEach((malId, i) => {
-      setTimeout(() => {
-        fetch(`https://api.jikan.moe/v4/anime/${malId}`)
-          .then(r => r.json())
-          .then(d => { if (d.data) setRelatedDetails(prev => ({ ...prev, [malId]: d.data })); })
-          .catch(console.error);
-      }, i * 900);
-    });
-  }, [anime]);
 
   const getLocalTime = (broadcast) => {
     if (!broadcast || !broadcast.time || !broadcast.day) return null;

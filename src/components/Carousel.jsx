@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import styles from './Carousel.module.css';
 
 export default function Carousel({ title, items, renderItem }) {
   const scrollRef = useRef(null);
@@ -61,16 +62,16 @@ export default function Carousel({ title, items, renderItem }) {
   if (!items || items.length === 0) return null;
 
   return (
-    <div style={{ marginBottom: 40 }}>
+    <div className={styles.carouselContainer}>
       {title && (
-        <h3 className="section-title" style={{ fontSize: 22, marginBottom: 20 }}>
+        <h3 className={`${styles.title} section-title`}>
           {title}
         </h3>
       )}
 
-      <div style={{ position: 'relative' }}>
+      <div className={styles.sliderWrapper}>
         {showLeft && (
-          <button onClick={() => scroll('left')} className="slider-btn left">
+          <button onClick={() => scroll('left')} className={`${styles.sliderBtn} ${styles.left}`}>
             <ChevronLeft size={22} />
           </button>
         )}
@@ -82,14 +83,14 @@ export default function Carousel({ title, items, renderItem }) {
           onMouseLeave={onMouseLeave}
           onMouseUp={onMouseUp}
           onMouseMove={onMouseMove}
-          className="horizontal-scroll"
+          className={styles.horizontalScroll}
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
           {items.map(renderItem)}
         </div>
 
         {showRight && (
-          <button onClick={() => scroll('right')} className="slider-btn right">
+          <button onClick={() => scroll('right')} className={`${styles.sliderBtn} ${styles.right}`}>
             <ChevronRight size={22} />
           </button>
         )}
@@ -97,3 +98,4 @@ export default function Carousel({ title, items, renderItem }) {
     </div>
   );
 }
+
