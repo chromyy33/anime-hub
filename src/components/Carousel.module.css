@@ -16,15 +16,34 @@
   gap: 16px;
   overflow-x: auto;
   overflow-y: visible;
-  padding-bottom: 250px; /* Room for dropdowns */
-  margin-bottom: -250px;
-  padding-top: 8px;
-  scroll-snap-type: x mandatory;
+  /* Breathing room for the hover lift (-6px) and emerald ring on edge items.
+     Negative side margins keep edge alignment with section titles.
+     Watchlist menus portal to document.body, so no dropdown room is needed —
+     and with no dead overlap zone, nothing below can be click-blocked. */
+  padding: 8px 8px 12px;
+  margin: 0 -8px;
+  /* No native snap for mouse: release settling is done in JS (settle()),
+     gliding to the nearest full page. Touch devices get gentle native
+     snap instead (see hover:none below) so momentum never fights JS. */
+  scroll-snap-type: none;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scroll-padding: 0 var(--spacing-lg);
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
+  cursor: grab;
+}
+
+.horizontalScroll.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+@media (hover: none) {
+  /* Touch: let the browser settle momentum natively; JS stays out of the way. */
+  .horizontalScroll {
+    scroll-snap-type: x proximity;
+  }
 }
 
 .horizontalScroll::-webkit-scrollbar {
@@ -59,7 +78,7 @@
 
 .sliderBtn:hover {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border-color: var(--primary);
   transform: translateY(-50%) scale(1.1);
 }

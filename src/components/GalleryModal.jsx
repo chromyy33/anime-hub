@@ -110,7 +110,7 @@ export default function GalleryModal({ show, onClose, images, title, filenamePre
                     transition={{ delay: Math.min(idx * 0.05, 0.3) }}
                     className={styles.card}
                     onClick={() => setActiveIndex(idx)}
-                    style={{ cursor: 'pointer' }}
+                    className={styles.zoomable}
                   >
                     <img
                       src={imgUrl}

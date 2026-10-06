@@ -30,7 +30,8 @@
   transform: scale(1.05);
 }
 
-/* ── Badge Variant ── */
+/* ── Badge Variant ──
+   Half-pill fused to the poster's bottom edge: rounded top, square bottom. */
 .badgeState {
   display: flex;
   align-items: center;
@@ -47,7 +48,7 @@
   pointer-events: none;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 /* ── Default / Split Buttons ── */
@@ -117,7 +118,7 @@
 .statusCompleted {
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 .statusCompleted.isBadgeState {
   border: none;
@@ -150,17 +151,13 @@
 }
 
 /* ── Dropdown ── */
+/* ── Dropdown ──
+   Positioned by the .wl-portal wrapper (fixed, viewport-pinned) —
+   this element only paints the menu box. */
 .dropdownMenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  bottom: unset;
-  left: 0;
-  z-index: 1000;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.1), transparent), var(--bg-elevated);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid var(--badge-border);
-  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: var(--bg-solid);
+  border: 1px solid var(--menu-border);
+  box-shadow: var(--shadow-lg);
   border-radius: var(--radius-md);
   width: 210px;
   overflow: hidden;
@@ -193,18 +190,18 @@
 }
 
 .statusOptionBtnActive {
-  background: rgba(16, 185, 129, 0.08);
+  background: var(--primary-dim);
   font-weight: 600;
-  color: var(--primary);
+  color: var(--text-accent);
 }
 
 .statusOptionBtn:hover {
-  background: rgba(16, 185, 129, 0.12);
+  background: var(--primary-wash);
 }
 
 /* Rating Section */
 .ratingSection {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border-strong);
   padding: 12px 14px;
 }
 
@@ -230,7 +227,7 @@
 }
 
 .ratingVal.hasRating {
-  color: var(--primary);
+  color: var(--text-accent);
 }
 
 .ratingSlider {
@@ -254,7 +251,7 @@
 
 /* Remove/Delete Section */
 .removeSection {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border-strong);
   padding: 6px 8px;
 }
 
@@ -275,6 +272,24 @@
 }
 
 .removeBtn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: rgb(239, 68, 68);
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+/* ── Extracted from inline styles ── */
+.chev {
+  transition: transform 0.2s;
+}
+
+.chevOpen {
+  transform: rotate(180deg);
+}
+
+.menuPad {
+  padding: 8px 0;
+}
+
+.checkIcon {
+  margin-left: auto;
+  color: var(--primary);
 }

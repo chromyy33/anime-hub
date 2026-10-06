@@ -5,6 +5,7 @@ import { Star, SearchX, ChevronLeft, ChevronRight, SlidersHorizontal, X, Check, 
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
 import { searchAnime } from '../utils/anilist';
+import styles from './SearchPage.module.css';
 
 // ─── Popular genres (AniList compatible) ──────────────────────────────
 export const POPULAR_GENRES = [
@@ -45,14 +46,7 @@ function GenrePill({ genre, selected, onToggle }) {
   return (
     <button
       onClick={() => onToggle(gId)}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '4px 10px', borderRadius: 99, fontSize: 12, fontWeight: 500,
-        border: `1px solid ${selected ? 'var(--primary)' : 'var(--border-subtle)'}`,
-        background: selected ? 'rgba(16,185,129,0.12)' : 'var(--bg-surface)',
-        color: selected ? 'var(--primary)' : 'var(--text-tertiary)',
-        cursor: 'pointer', transition: 'all 0.15s',
-      }}
+      className={`${styles.pill} ${selected ? styles.selected : ''}`}
     >
       {selected && <Check size={11} strokeWidth={3} />}
       {genre.name}
@@ -64,11 +58,11 @@ function GenrePill({ genre, selected, onToggle }) {
 function ScoreSlider({ label, value, onChange, min = 0, max = 10, step = 0.5 }) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-tertiary)' }}>
+      <div className={styles.scoreHead}>
+        <span className={styles.scoreLabel}>
           {label}
         </span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: value > 0 ? 'var(--primary)' : 'var(--text-tertiary)' }}>
+        <span className={`${styles.scoreVal} ${value > 0 ? styles.rated : ''}`}>
           {value}
         </span>
       </div>
@@ -76,11 +70,11 @@ function ScoreSlider({ label, value, onChange, min = 0, max = 10, step = 0.5 }) 
         type="range" min={min} max={max} step={step}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer', outline: 'none', display: 'block' }}
+        className={styles.scoreInput}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+      <div className={styles.scoreTicks}>
         {[0, 5, 10].map(n => (
-          <span key={n} style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{n}</span>
+          <span key={n} className={styles.scoreTick}>{n}</span>
         ))}
       </div>
     </div>
@@ -101,20 +95,14 @@ function FilterSelect({ label, value, onChange, options }) {
 
   return (
     <div ref={ref}>
-      <label style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</label>
-      <div style={{ position: 'relative' }}>
+      <label className={styles.selectLabel}>{label}</label>
+      <div className={styles.selectAnchor}>
         <button
           onClick={() => setOpen(o => !o)}
-          style={{
-            width: '100%', padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-            border: `1px solid ${open ? 'var(--primary)' : 'var(--border-subtle)'}`,
-            background: 'var(--bg-surface)', color: value ? 'var(--text-primary)' : 'var(--text-tertiary)',
-            fontSize: 13, cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.15s',
-            fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}
+          className={`${styles.selectTrigger} ${value ? styles.hasValue : ''} ${open ? styles.open : ''}`}
         >
           <span>{selected.label}</span>
-          <ChevronDown size={14} style={{ color: 'var(--text-tertiary)', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }} />
+          <ChevronDown size={14} className={`${styles.selectChevron} ${open ? styles.open : ''}`} />
         </button>
 
         <AnimatePresence>
@@ -124,26 +112,11 @@ function FilterSelect({ label, value, onChange, options }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              style={{
-                position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50,
-                background: `linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent), var(--bg-elevated)`, 
-                border: '1px solid var(--border-strong)',
-                backdropFilter: 'blur(var(--glass-blur))', WebkitBackdropFilter: 'blur(var(--glass-blur))',
-                borderRadius: 'var(--radius-sm)', boxShadow: 'inset 0 0 0 1px var(--glass-border), var(--shadow-lg)', overflow: 'hidden',
-              }}
+              className={styles.selectMenu}
             >
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }}
-                  style={{
-                    width: '100%', padding: '9px 12px', textAlign: 'left', border: 'none',
-                    background: o.value === value ? 'rgba(16,185,129,0.08)' : 'transparent',
-                    color: o.value === value ? 'var(--primary)' : 'var(--text-primary)',
-                    fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center',
-                    justifyContent: 'space-between', fontFamily: 'inherit',
-                    transition: 'background 0.1s',
-                  }}
-                  onMouseOver={e => { if (o.value !== value) e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
-                  onMouseOut={e => { if (o.value !== value) e.currentTarget.style.background = 'transparent'; }}
+                  className={`${styles.selectOption} ${o.value === value ? styles.active : ''}`}
                 >
                   {o.label}
                   {o.value === value && <Check size={13} strokeWidth={3} />}
@@ -170,6 +143,10 @@ export default function SearchPage() {
   const urlSort   = searchParams.get('order_by') || 'score';
   const urlMinScore = parseFloat(searchParams.get('min_score') || '0');
   const urlYear   = searchParams.get('start_date') ? searchParams.get('start_date').slice(0, 4) : '';
+  // Section "View all" links land here (?filter=airing / ?filter=top).
+  // Translate once into the real filter params everything downstream uses.
+  const urlFilter = searchParams.get('filter') || '';
+  const effStatus = urlStatus || (urlFilter === 'airing' ? 'airing' : '');
 
   // ── Local filter state (drafts until Apply) ─────────────────────────
   const [selectedGenres, setSelectedGenres] = useState(() => {
@@ -177,7 +154,7 @@ export default function SearchPage() {
     return urlGenres.split(',').map(g => JIKAN_TO_ANILIST_GENRES[g] || g);
   });
   const [type,     setType]     = useState(urlType);
-  const [status,   setStatus]   = useState(urlStatus);
+  const [status,   setStatus]   = useState(effStatus);
   const [sort,     setSort]     = useState(urlSort);
   const [minScore, setMinScore] = useState(urlMinScore);
   const [year,     setYear]     = useState(urlYear);
@@ -212,7 +189,7 @@ export default function SearchPage() {
       query,
       genre: genreStr,
       format: urlType,
-      status: urlStatus,
+      status: effStatus,
       sort: urlSort,
       minScore: urlMinScore,
       year: urlYear,
@@ -233,7 +210,7 @@ export default function SearchPage() {
       });
 
     return () => { cancelled = true; };
-  }, [query, urlGenres, urlType, urlStatus, urlSort, urlMinScore, urlYear, page]);
+  }, [query, urlGenres, urlType, urlStatus, urlFilter, urlSort, urlMinScore, urlYear, page]);
 
   // ── Apply filters → update URL (resets to page 1) ───────────────────
   const applyFilters = () => {
@@ -268,11 +245,15 @@ export default function SearchPage() {
   };
 
 
+  const hasSearch  = query || urlGenres || urlType || urlStatus || urlMinScore > 0 || urlYear;
   const hasResults = !loading && results.length > 0;
-  const isEmpty    = !loading && results.length === 0 && (query || urlGenres);
+  // Empty-with-search covers every filter type; the browse hint only shows
+  // when nothing was asked for AND nothing came back (default browse fills
+  // the grid, so it must not show alongside results).
+  const isEmpty    = !loading && results.length === 0 && !!hasSearch;
 
   return (
-    <div style={{ paddingBottom: 60 }}>
+    <div className={styles.wrap}>
       <SEO 
         title={query ? `Search: ${query}` : 'Browse Anime'} 
         description={query ? `Search results for ${query} on AniDoc.` : "Browse and filter the vast anime library on AniDoc."}
@@ -280,39 +261,32 @@ export default function SearchPage() {
       />
 
       {/* ── Page Header ── */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', marginBottom: 32 }}>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          {pagination && <p className="text-xs" style={{ marginBottom: 6, color: 'var(--text-tertiary)' }}>
+      <div className={styles.header}>
+        <div className={styles.headerInfo}>
+          {pagination && <p className={`text-xs ${styles.resultCount}`}>
             {pagination.items?.total?.toLocaleString()} results
             {query && <> for <span className="text-primary font-semibold">"{query}"</span></>}
           </p>}
-          <h1 className="page-title" style={{ margin: 0, lineHeight: 1.2 }}>
+          <h1 className={`page-title ${styles.resultTitle}`}>
             {query ? <>Results for <span className="text-accent">"{query}"</span></> : 'Browse Anime'}
           </h1>
         </div>
 
         {/* Filter toggle button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className={styles.filterToggleRow}>
           {activeCount > 0 && (
-            <button onClick={clearFilters}
-              style={{ fontSize: 13, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button onClick={clearFilters} className={styles.clearFilters}>
               <X size={14} /> Clear filters
             </button>
           )}
           <button
             onClick={() => setShowFilters(f => !f)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
-              border: `1px solid ${showFilters ? 'var(--primary)' : 'var(--border-strong)'}`,
-              borderRadius: 'var(--radius-sm)', background: showFilters ? 'rgba(16,185,129,0.08)' : 'var(--bg-surface)',
-              color: showFilters ? 'var(--primary)' : 'var(--text-primary)', cursor: 'pointer',
-              fontSize: 13, fontWeight: 500, transition: 'all 0.15s', fontFamily: 'inherit',
-            }}
+            className={`${styles.filterToggle} ${showFilters ? styles.open : ''}`}
           >
             <SlidersHorizontal size={15} />
             Filters
             {activeCount > 0 && (
-              <span style={{ background: 'var(--primary)', color: '#fff', borderRadius: 99, fontSize: 11, fontWeight: 700, padding: '1px 6px', lineHeight: 1.4 }}>
+              <span className={styles.filterCount}>
                 {activeCount}
               </span>
             )}
@@ -328,10 +302,10 @@ export default function SearchPage() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            style={{ overflow: 'hidden' }}
+            className={styles.panelAnim}
           >
-            <div className="card filter-panel" style={{ marginBottom: 24 }}>
-              <div className="grid-list" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 24 }}>
+            <div className={`card filter-panel ${styles.panelCard}`}>
+              <div className={`grid-list ${styles.filterGrid}`}>
 
                 <FilterSelect label="Type" value={type} onChange={setType} options={[
                   { value: '', label: 'Any type' },
@@ -358,12 +332,12 @@ export default function SearchPage() {
                 ]} />
 
                 <div>
-                  <label className="card-label" style={{ marginBottom: 6 }}>Year</label>
+                  <label className={`card-label ${styles.yearLabel}`}>Year</label>
                   <input
                     type="number" placeholder="e.g. 2023" value={year}
                     onChange={e => setYear(e.target.value)}
                     min="1960" max={new Date().getFullYear() + 1}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 13, boxSizing: 'border-box', fontFamily: 'inherit' }}
+                    className={styles.yearInput}
                   />
                 </div>
 
@@ -371,13 +345,13 @@ export default function SearchPage() {
               </div>
 
               {/* Genre multi-select */}
-              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    Popular Genres {selectedGenres.length > 0 && <span style={{ color: 'var(--primary)' }}>({selectedGenres.length} selected)</span>}
+              <div className={styles.genreArea}>
+                <div className={styles.genreHead}>
+                  <span className={styles.genreLabel}>
+                    Popular Genres {selectedGenres.length > 0 && <span className={styles.genrePicked}>({selectedGenres.length} selected)</span>}
                   </span>
                 </div>
-                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 140, overflowY: 'auto', paddingRight: 4 }}>
+                 <div className={styles.genreGrid}>
                   {POPULAR_GENRES.map(g => (
                     <GenrePill key={g.id} genre={g} selected={selectedGenres.includes(g.id)} onToggle={toggleGenre} />
                   ))}
@@ -385,10 +359,9 @@ export default function SearchPage() {
               </div>
 
               {/* Apply button */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20, borderTop: '1px solid var(--border-subtle)', paddingTop: 20 }}>
+              <div className={styles.panelActions}>
                 <button onClick={() => setShowFilters(false)}
-                  className="filter-action-btn"
-                  style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  className={`filter-action-btn ${styles.cancelBtn}`}>
                   Cancel
                 </button>
                 <button onClick={applyFilters} className="btn-primary filter-action-btn">
@@ -402,16 +375,16 @@ export default function SearchPage() {
 
       {/* Active filter chips (below panel when closed) */}
       {!showFilters && activeCount > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-          {urlType && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Type: {urlType.toUpperCase()}</span>}
-          {urlStatus && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Status: {urlStatus}</span>}
-          {urlMinScore > 0 && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Score ≥ {urlMinScore}</span>}
-          {urlYear && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Year: {urlYear}</span>}
-          {urlSort !== 'score' && <span className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Sort: {urlSort}</span>}
+        <div className={styles.activeChips}>
+          {urlType && <span className={`badge ${styles.activeChip}`}>Type: {urlType.toUpperCase()}</span>}
+          {effStatus && <span className={`badge ${styles.activeChip}`}>Status: {effStatus}</span>}
+          {urlMinScore > 0 && <span className={`badge ${styles.activeChip}`}>Score ≥ {urlMinScore}</span>}
+          {urlYear && <span className={`badge ${styles.activeChip}`}>Year: {urlYear}</span>}
+          {urlSort !== 'score' && <span className={`badge ${styles.activeChip}`}>Sort: {urlSort}</span>}
           {urlGenres && urlGenres.split(',').map(gid => {
             const resolved = JIKAN_TO_ANILIST_GENRES[gid] || gid;
             const g = POPULAR_GENRES.find(x => x.id === resolved || x.name === resolved);
-            return g ? <span key={gid} className="badge" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>{g.name}</span> : null;
+            return g ? <span key={gid} className={`badge ${styles.activeChip}`}>{g.name}</span> : null;
           })}
         </div>
       )}
@@ -420,11 +393,11 @@ export default function SearchPage() {
       {loading && (
         <div className="grid-list">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="card skeleton" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-              <div style={{ paddingTop: '145%' }} />
-              <div style={{ padding: 12 }}>
-                <div style={{ height: 13, background: 'var(--border-strong)', borderRadius: 4, marginBottom: 8 }} />
-                <div style={{ height: 11, background: 'var(--border-subtle)', borderRadius: 4, width: '55%' }} />
+            <div key={i} className={`card skeleton ${styles.skelCard}`}>
+              <div className={styles.skelMedia} />
+              <div className={styles.skelBody}>
+                <div className={styles.skelBar} />
+                <div className={styles.skelBarShort} />
               </div>
             </div>
           ))}
@@ -433,26 +406,25 @@ export default function SearchPage() {
 
       {/* ── Empty state ── */}
       {isEmpty && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 260, color: 'var(--text-tertiary)' }}>
+        <div className={styles.emptyWrap}>
           <SearchX size={48} strokeWidth={1.5} />
-          <p style={{ marginTop: 16, fontSize: 16 }}>No results found{query ? ` for "${query}"` : ''}</p>
-          {activeCount > 0 && <button onClick={clearFilters} style={{ marginTop: 12, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}>Clear filters and try again</button>}
+          <p className={styles.emptyIcon}>No results found{query ? ` for "${query}"` : ''}</p>
+          {activeCount > 0 && <button onClick={clearFilters} className={styles.emptyRetry}>Clear filters and try again</button>}
         </div>
       )}
 
        {/* ── Error state ── */}
       {error && (
-        <div style={{ textAlign: 'center', padding: '60px 0',
-          color: '#ef4444', fontSize: 15 }}>
+        <div className={styles.loadError}>
           {error}
         </div>
       )}
 
-      {/* ── No query state ── */}
-      {!query && !urlGenres && !urlType && !urlStatus && !urlMinScore && !urlYear && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--text-tertiary)' }}>
+      {/* ── No query state (only when truly nothing to show) ── */}
+      {!loading && results.length === 0 && !hasSearch && (
+        <div className={styles.browseHint}>
           <SearchX size={48} strokeWidth={1.5} />
-          <p style={{ marginTop: 16, fontSize: 16 }}>Search above or open Filters to browse.</p>
+          <p className={styles.browseHintText}>Search above or open Filters to browse.</p>
         </div>
       )}
 
@@ -467,9 +439,9 @@ export default function SearchPage() {
 
       {/* ── Pagination ── */}
       {pagination && pagination.last_visible_page > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 48 }}>
+        <div className={styles.pagination}>
           <button onClick={() => goToPage(page - 1)} disabled={page <= 1}
-            className="btn-ghost" style={{ opacity: page <= 1 ? 0.5 : 1, cursor: page <= 1 ? 'not-allowed' : 'pointer' }}>
+            className={`btn-ghost ${page <= 1 ? styles.pageBtnDim : styles.pageBtnLive}`}>
             <ChevronLeft size={16} /> Prev
           </button>
 
@@ -480,18 +452,17 @@ export default function SearchPage() {
             for (let i = start; i <= end; i++) pages.push(i);
             if (end < total) { if (end < total - 1) pages.push('...'); pages.push(total); }
             return pages.map((p, i) => p === '...' ? (
-              <span key={`e-${i}`} style={{ padding: '0 6px', color: 'var(--text-tertiary)', fontSize: 14 }}>…</span>
+              <span key={`e-${i}`} className={styles.pageEllipsis}>…</span>
             ) : (
               <button key={p} onClick={() => goToPage(p)}
-                className={p === page ? "btn-primary" : "btn-ghost"}
-                style={{ padding: '0.6em 1em', minWidth: '2.5em' }}>
+                className={`${p === page ? "btn-primary" : "btn-ghost"} ${styles.pageNum}`}>
                 {p}
               </button>
             ));
           })()}
 
           <button onClick={() => goToPage(page + 1)} disabled={!pagination.has_next_page}
-            className="btn-ghost" style={{ opacity: !pagination.has_next_page ? 0.5 : 1, cursor: !pagination.has_next_page ? 'not-allowed' : 'pointer' }}>
+            className={`btn-ghost ${!pagination.has_next_page ? styles.pageBtnDim : styles.pageBtnLive}`}>
             Next <ChevronRight size={16} />
           </button>
         </div>

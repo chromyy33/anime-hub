@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
 import { searchAnime } from '../utils/anilist';
+import styles from './GenrePage.module.css';
 
 export default function GenrePage() {
   const { id, name } = useParams();
@@ -53,19 +54,19 @@ export default function GenrePage() {
   };
 
   return (
-    <div style={{ paddingBottom: 60 }}>
+    <div className={styles.wrap}>
       <SEO 
         title={`${name.replace(/-/g, ' ')} Anime`} 
         description={`Explore the best ${name.replace(/-/g, ' ')} anime on AniDoc. Top rated and trending titles in the ${name.replace(/-/g, ' ')} genre.`}
         url={`/genre/${id}/${name}`}
       />
       {/* Header */}
-      <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div className="section-icon" style={{ width: 48, height: 48 }}>
+      <div className={`page-header ${styles.headerRow}`}>
+        <div className={`section-icon ${styles.headerIcon}`}>
           <LayoutGrid size={24} />
         </div>
         <div>
-          <h1 className="page-title" style={{ margin: 0, textTransform: 'capitalize' }}>
+          <h1 className={`page-title ${styles.title}`}>
             {name.replace(/-/g, ' ')} Anime
           </h1>
           <p className="page-subtitle">
@@ -75,8 +76,7 @@ export default function GenrePage() {
       </div>
  
       {error && (
-        <div style={{ textAlign: 'center', padding: '60px 0', 
-          color: '#ef4444', fontSize: 15 }}>
+        <div className={styles.error}>
           {error}
         </div>
       )}
@@ -85,11 +85,11 @@ export default function GenrePage() {
       {!error && (loading ? (
         <div className="grid-list">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="card skeleton" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-              <div style={{ paddingTop: '145%' }} />
-              <div style={{ padding: 12 }}>
-                <div style={{ height: 14, background: 'var(--border-strong)', borderRadius: 4, marginBottom: 8 }} />
-                <div style={{ height: 12, background: 'var(--border-subtle)', borderRadius: 4, width: '60%' }} />
+            <div key={i} className={`card skeleton ${styles.skeletonCard}`}>
+              <div className={styles.skeletonMedia} />
+              <div className={styles.skeletonBody}>
+                <div className={styles.skeletonBar} />
+                <div className={styles.skeletonBarShort} />
               </div>
             </div>
           ))}
@@ -104,9 +104,9 @@ export default function GenrePage() {
 
       {/* Pagination */}
       {pagination && pagination.last_visible_page > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 48 }}>
+        <div className={styles.pagination}>
           <button onClick={() => goToPage(page - 1)} disabled={page <= 1} aria-label="Previous page"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', background: 'var(--bg-surface)', color: page <= 1 ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: page <= 1 ? 'not-allowed' : 'pointer', fontWeight: 500, fontSize: 14 }}>
+            className={styles.pageBtn}>
             <ChevronLeft size={16} /> Prev
           </button>
 
@@ -117,17 +117,17 @@ export default function GenrePage() {
             for (let i = start; i <= end; i++) pages.push(i);
             if (end < total) { if (end < total - 1) pages.push('...'); pages.push(total); }
             return pages.map((p, i) => p === '...' ? (
-              <span key={`e-${i}`} style={{ padding: '0 6px', color: 'var(--text-tertiary)', fontSize: 14 }}>…</span>
+              <span key={`e-${i}`} className={styles.ellipsis}>…</span>
             ) : (
               <button key={p} onClick={() => goToPage(p)} aria-label={`Go to page ${p}`}
-                style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', border: '1px solid', borderColor: p === page ? 'var(--primary)' : 'var(--border-subtle)', background: p === page ? 'var(--primary)' : 'var(--bg-surface)', color: p === page ? '#fff' : 'var(--text-primary)', fontWeight: p === page ? 700 : 400, cursor: 'pointer', fontSize: 14, transition: 'all 0.15s' }}>
+                className={`${styles.pageNum} ${p === page ? styles.active : ''}`}>
                 {p}
               </button>
             ));
           })()}
 
           <button onClick={() => goToPage(page + 1)} disabled={!pagination.has_next_page} aria-label="Next page"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', background: 'var(--bg-surface)', color: !pagination.has_next_page ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: !pagination.has_next_page ? 'not-allowed' : 'pointer', fontWeight: 500, fontSize: 14 }}>
+            className={styles.pageBtn}>
             Next <ChevronRight size={16} />
           </button>
         </div>

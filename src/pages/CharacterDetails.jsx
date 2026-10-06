@@ -5,23 +5,23 @@ import { Heart, ArrowLeft, Star, Film, Mic2, Info, ChevronRight, Download } from
 import { fetchCharacterDetails } from '../utils/anilist';
 import SEO from '../components/SEO';
 import GalleryModal from '../components/GalleryModal';
+import styles from './CharacterDetails.module.css';
 
 // ─── Character Skeleton ──────────────────────────────────────────────
 function CharacterSkeleton() {
-  const itemStyle = { border: '1px solid var(--border-subtle)' };
   return (
-    <div className="page-container" style={{ paddingBottom: 60 }}>
-      <div className="skeleton" style={{ width: 100, height: 20, marginBottom: 32, borderRadius: 4, ...itemStyle }} />
+    <div className={`page-container ${styles.wrap}`}>
+      <div className={`skeleton ${styles.skelBack} ${styles.skelItem}`} />
       <div className="details-layout">
         <div className="details-left">
-          <div className="skeleton" style={{ width: '100%', aspectRatio: '2/3', borderRadius: 16, ...itemStyle }} />
-          <div className="skeleton" style={{ height: 120, marginTop: 24, borderRadius: 12, ...itemStyle }} />
+          <div className={`skeleton ${styles.skelPoster} ${styles.skelItem}`} />
+          <div className={`skeleton ${styles.skelStats} ${styles.skelItem}`} />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="skeleton" style={{ width: '60%', height: 48, marginBottom: 12, borderRadius: 8, ...itemStyle }} />
-          <div className="skeleton" style={{ width: '30%', height: 24, marginBottom: 40, borderRadius: 4, ...itemStyle }} />
-          <div className="skeleton" style={{ height: 200, marginBottom: 48, borderRadius: 12, ...itemStyle }} />
-          <div className="skeleton" style={{ height: 400, borderRadius: 12, ...itemStyle }} />
+        <div className={styles.colMain}>
+          <div className={`skeleton ${styles.skelTitle} ${styles.skelItem}`} />
+          <div className={`skeleton ${styles.skelSub} ${styles.skelItem}`} />
+          <div className={`skeleton ${styles.skelBlock} ${styles.skelItem}`} />
+          <div className={`skeleton ${styles.skelBlockLg} ${styles.skelItem}`} />
         </div>
       </div>
     </div>
@@ -86,10 +86,10 @@ export default function CharacterDetails() {
   } : null, [data]);
 
   if (loading) return <CharacterSkeleton />;
-  if (!data) return <div className="text-center" style={{ marginTop: 100, color: '#ef4444' }}>Character not found.</div>;
+  if (!data) return <div className={`text-center ${styles.notFound}`}>Character not found.</div>;
 
   return (
-    <div className="page-container" style={{ paddingBottom: 60 }}>
+    <div className={`page-container ${styles.wrap}`}>
       <SEO 
         title={data ? data.name : 'Loading...'} 
         description={data?.about?.slice(0, 160)}
@@ -102,10 +102,7 @@ export default function CharacterDetails() {
       {/* Back Navigation */}
       <button
         onClick={() => navigate(-1)}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 8,
-          color: 'var(--text-tertiary)', background: 'none', border: 'none',
-          cursor: 'pointer', marginBottom: 32, fontSize: 14, fontWeight: 600,
-          padding: 0, fontFamily: 'inherit' }}
+        className={styles.backBtn}
       >
         <ArrowLeft size={16} /> Back
       </button>
@@ -114,10 +111,10 @@ export default function CharacterDetails() {
         
         {/* LEFT COLUMN */}
         <div className="details-left">
-            <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-md)', border: '1px solid var(--border-subtle)' }}>
-                <img src={data.images?.jpg?.image_url} alt={data.name} style={{ width: '100%', display: 'block', minHeight: 400, background: 'var(--bg-surface)' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)', display: 'flex', justifyContent: 'space-between', color: '#fff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+            <div className={styles.posterWrap}>
+                <img src={data.images?.jpg?.image_url} alt={data.name} className={styles.posterImg} />
+                <div className={styles.posterOverlay}>
+                    <div className={styles.posterFav}>
                         <Heart size={16} color="var(--primary)" fill="var(--primary)"/> 
                         {data.favorites?.toLocaleString() || 0}
                     </div>
@@ -143,8 +140,7 @@ export default function CharacterDetails() {
                 {pictures.length > 0 && (
                     <button
                         onClick={() => setShowGallery(true)}
-                        className="btn-ghost w-full flex-center gap-sm"
-                        style={{ marginTop: 20 }}
+                        className={`btn-ghost w-full flex-center gap-sm ${styles.statsBtn}`}
                     >
                         <Download size={15} /> Download Wallpapers ({pictures.length})
                     </button>
@@ -153,46 +149,37 @@ export default function CharacterDetails() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className={styles.colMain}>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, marginBottom: 8, letterSpacing: '-1px', lineHeight: 1.1 }}>{data.name}</h1>
-                <h2 style={{ fontSize: 18, color: 'var(--text-tertiary)', fontWeight: 400, marginBottom: 32 }}>{data.name_kanji}</h2>
+                <h1 className={styles.nameTitle}>{data.name}</h1>
+                <h2 className={styles.nameSub}>{data.name_kanji}</h2>
 
                 <h3 className="section-title">Biography</h3>
-                <p style={{ lineHeight: 1.8, color: 'var(--text-secondary)', fontSize: 16, marginBottom: 48, whiteSpace: 'pre-line' }}>
+                <p className={styles.bio}>
                     {data.about || "No biography available."}
                 </p>
 
                 {/* Animeography - Contained List */}
-                <div style={{ marginBottom: 48 }}>
+                <div className={styles.sectionGap}>
                     <h3 className="section-title">Animeography</h3>
-                    <div className="card" style={{ padding: 2, background: 'var(--bg-surface)' }}>
-                        <div className="anime-list" style={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 480, overflowY: 'auto' }}>
-                            {data.anime?.map((item, idx) => (
+                    <div className={`card ${styles.listShell}`}>
+                        <div className={`anime-list ${styles.animeList}`}>
+                            {data.anime?.map((item) => (
                                 <Link key={item.anime.mal_id} to={`/anime/${item.anime.mal_id}`}
-                                    style={{ 
-                                        textDecoration: 'none', 
-                                        display: 'flex', 
-                                        background: 'var(--bg-surface)', 
-                                        padding: '12px 16px',
-                                        transition: 'background 0.2s',
-                                        borderBottom: idx === data.anime.length - 1 ? 'none' : '1px solid var(--border-subtle)'
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.background = 'var(--bg-surface-hover)'}
-                                    onMouseOut={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                                    className={styles.animeRow}
                                 >
-                                    <div style={{ width: 56, height: 80, flexShrink: 0, borderRadius: 6, overflow: 'hidden', background: 'var(--bg-base)' }}>
-                                        <img src={item.anime.images?.jpg?.image_url} alt={item.anime.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div className={styles.animeThumb}>
+                                        <img src={item.anime.images?.jpg?.image_url} alt={item.anime.title} className={styles.animeThumbImg} loading="lazy" decoding="async" />
                                     </div>
-                                    <div style={{ flex: 1, paddingLeft: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-                                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.anime.title}</div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
-                                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase' }}>{item.role}</span>
-                                            <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)' }} />
-                                            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{item.anime.type}</span>
+                                    <div className={styles.animeInfo}>
+                                        <div className={styles.animeTitle}>{item.anime.title}</div>
+                                        <div className={styles.animeMeta}>
+                                            <span className={styles.animeRole}>{item.role}</span>
+                                            <span className={styles.animeDot} />
+                                            <span className={styles.animeType}>{item.anime.type}</span>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-tertiary)', opacity: 0.4 }}>
+                                    <div className={styles.animeExt}>
                                         <Film size={14} />
                                     </div>
                                 </Link>
@@ -203,10 +190,10 @@ export default function CharacterDetails() {
 
                 {/* Voice Actors with Button-Chip Language Filter */}
                 {data.voices?.length > 0 && (
-                    <div style={{ marginBottom: 40 }}>
-                        <h3 className="section-title" style={{ marginBottom: 16 }}>Voice Actors</h3>
+                    <div className={styles.vaSectionGap}>
+                        <h3 className={`section-title ${styles.vaTitle}`}>Voice Actors</h3>
                         
-                        <div className="flex flex-wrap gap-sm" style={{ marginBottom: 24 }}>
+                        <div className={`flex flex-wrap gap-sm ${styles.langRow}`}>
                             {voiceLangs.map(lang => (
                                 <button
                                     key={lang}
@@ -218,15 +205,15 @@ export default function CharacterDetails() {
                             ))}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+                        <div className={styles.vaGrid}>
                             {filteredVoices.map((v) => (
-                                <div key={v.person.mal_id} className="card" style={{ display: 'flex', gap: 14, padding: 12, alignItems: 'center' }}>
-                                    <img src={v.person.images?.jpg?.image_url} alt={v.person.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--border-subtle)' }} />
-                                    <div style={{ minWidth: 0, flex: 1 }}>
-                                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.person.name}</div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                                <div key={v.person.mal_id} className={`card ${styles.vaCard}`}>
+                                    <img src={v.person.images?.jpg?.image_url} alt={v.person.name} className={styles.vaImg} loading="lazy" decoding="async" />
+                                    <div className={styles.vaInfo}>
+                                        <div className={styles.vaName}>{v.person.name}</div>
+                                        <div className={styles.vaLang}>
                                             <Mic2 size={12} color="var(--primary)" />
-                                            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{v.language} Voice Actor</span>
+                                            <span>{v.language} Voice Actor</span>
                                         </div>
                                     </div>
                                 </div>

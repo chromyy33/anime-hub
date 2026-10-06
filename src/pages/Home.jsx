@@ -8,6 +8,7 @@ import { fetchHomeData, fetchAnimeDetails } from '../utils/anilist';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from '../components/WatchlistButton';
 import SEO from '../components/SEO';
+import styles from './Home.module.css';
 
 // ─── Framer-motion variants ────────────────────────────────────────────
 const fadeUp = {
@@ -46,33 +47,33 @@ function HeroSlider({ slides }) {
   const anime = slides[active];
 
   return (
-    <div style={{ position: 'relative', height: 480, borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+    <div className={styles.hero}>
       {/* BG crossfade */}
       <AnimatePresence mode="sync">
         <motion.img key={`bg-${anime.mal_id}`} src={anime.images.jpg.large_image_url} alt=""
           variants={bgVariants} initial="enter" animate="center" exit="exit"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}
+          className={styles.heroBg}
         />
       </AnimatePresence>
 
       {/* Gradient Overlays */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.45) 45%, rgba(2,6,23,0) 100%)' }} />
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%)', opacity: 0.6 }} />
+      <div className={styles.heroShadeBottom} />
+      <div className={styles.heroShadeTop} />
 
       {/* Hero Content Distribution */}
       <AnimatePresence mode="wait">
-        <motion.div key={`hero-${anime.mal_id}`} initial="hidden" animate="visible" exit="exit" style={{ position: 'absolute', inset: 0, zIndex: 5 }}>
+        <motion.div key={`hero-${anime.mal_id}`} initial="hidden" animate="visible" exit="exit" className={styles.heroFrame}>
           
           {/* Top: Chips */}
           <motion.div variants={textVariants} initial="enter" animate="center" exit="exit"
-            style={{ position: 'absolute', top: 24, left: 24, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
+            className={styles.heroChips}
           >
-            <span style={{ background: 'var(--primary)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 4, letterSpacing: '0.06em', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.6s ease-in-out infinite' }} />
+            <span className={styles.heroLive}>
+              <span className={styles.heroLiveDot} />
               AIRING NOW
             </span>
             {anime.genres?.slice(0, 2).map(g => (
-              <Link key={g.mal_id} to={`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`} className="badge" style={{ fontSize: 11, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary)'} onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}>
+              <Link key={g.mal_id} to={`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`} className={`badge ${styles.heroGenre}`}>
                 {g.name}
               </Link>
             ))}
@@ -80,30 +81,29 @@ function HeroSlider({ slides }) {
 
           {/* Bottom: Main Text */}
           <motion.div variants={textVariants} initial="enter" animate="center" exit="exit"
-            className="hero-content"
-            style={{ position: 'absolute', bottom: 40, left: 24, right: 24 }}
+            className={`hero-content ${styles.heroMain}`}
           >
-            <div style={{ color: '#fff' }}>
-              <Link to={`/anime/${anime.mal_id}`} style={{ textDecoration: 'none', color: '#fff' }}>
-                <h1 style={{ color: '#fff' }}>
+            <div className={styles.heroText}>
+              <Link to={`/anime/${anime.mal_id}`} className={styles.heroTitleLink}>
+                <h1 className={styles.heroTitle}>
                   {anime.title_english || anime.title}
                 </h1>
               </Link>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <p className={styles.heroSynopsis}>
                 {anime.synopsis}
               </p>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <Link to={`/anime/${anime.mal_id}`} className="btn-primary" style={{ textDecoration: 'none' }}>
+              <div className={styles.heroActions}>
+                <Link to={`/anime/${anime.mal_id}`} className={`btn-primary ${styles.heroCta}`}>
                   <Play size={14} fill="currentColor" /> View Details
                 </Link>
                 {anime.score ? (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.8)', fontSize: 13 }}>
+                  <span className={styles.heroScore}>
                     <Star size={12} fill="var(--primary)" color="var(--primary)" />
-                    <strong style={{ color: '#fff' }}>{anime.score}</strong>
-                    <span style={{ opacity: 0.55 }}>· #{anime.rank}</span>
+                    <strong className={styles.heroScoreVal}>{anime.score}</strong>
+                    <span className={styles.heroScoreRank}>· #{anime.rank}</span>
                   </span>
                 ) : (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
+                  <span className={styles.heroNoScore}>
                     <Star size={12} color="rgba(255,255,255,0.3)" />
                     <span>No rating yet</span>
                   </span>
@@ -118,18 +118,18 @@ function HeroSlider({ slides }) {
       {[{ dir: 'prev', onClick: prev, style: { left: 10 }, Icon: ChevronLeft },
         { dir: 'next', onClick: next, style: { right: 10 }, Icon: ChevronRight }].map(({ dir, onClick, style, Icon }) => (
         <button key={dir} onClick={onClick}
-          className="slider-btn"
-          style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 10, ...style }}
+          className={`slider-btn ${styles.heroArrow}`}
+          style={style}
         >
           <Icon size={22} />
         </button>
       ))}
 
       {/* Dot nav */}
-      <div style={{ position: 'absolute', bottom: 20, right: 28, zIndex: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
+      <div className={styles.heroDots}>
         {slides.map((slide, i) => (
           <button key={slide.mal_id} onClick={() => setActive(i)}
-            style={{ width: i === active ? 24 : 8, height: 8, borderRadius: 99, border: 'none', cursor: 'pointer', transition: 'all 0.3s', background: i === active ? 'var(--primary)' : 'rgba(255,255,255,0.35)', padding: 0 }}
+            className={`${styles.heroDot} ${i === active ? styles.active : ''}`}
           />
         ))}
       </div>
@@ -142,14 +142,14 @@ function HeroSlider({ slides }) {
 function SectionHeader({ Icon, title, subtitle, linkTo }) {
   return (
     <motion.div variants={sectionVariant} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}
-      className="flex items-end justify-between gap-md" style={{ marginBottom: 20, flexWrap: 'wrap' }}>
+      className={`flex items-end justify-between gap-md ${styles.sectionHead}`}>
       <div className="flex items-center gap-md">
         <div className="section-icon">
           <Icon size={18} color="var(--primary)" />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <h2 className="text-lg font-bold" style={{ margin: 0, lineHeight: 1.2 }}>{title}</h2>
-          {subtitle && <p className="text-sm" style={{ margin: 0, opacity: 0.8, color: 'var(--text-tertiary)' }}>{subtitle}</p>}
+        <div className={styles.sectionHeadText}>
+          <h2 className={`text-lg font-bold ${styles.sectionHeadTitle}`}>{title}</h2>
+          {subtitle && <p className={`text-sm ${styles.sectionHeadSub}`}>{subtitle}</p>}
         </div>
       </div>
       {linkTo && (
@@ -164,7 +164,7 @@ function SkeletonRow() {
   return (
     <div className="flex gap-md overflow-hidden">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="skeleton" style={{ flex: '0 0 200px', height: 300, borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', opacity: 0.6 }} />
+        <div key={i} className={`skeleton ${styles.skeletonItem}`} />
       ))}
     </div>
   );
@@ -247,11 +247,11 @@ export default function Home() {
 
 
   if (errorMsg) return (
-    <div style={{ textAlign: 'center', marginTop: 100, color: '#ef4444', fontWeight: 600 }}>{errorMsg}</div>
+    <div className={styles.loadError}>{errorMsg}</div>
   );
 
   return (
-    <div className="page-container" style={{ paddingBottom: 0 }}>
+    <div className={`page-container ${styles.pageWrap}`}>
       <SEO 
         title="Your Ultimate Anime Hub" 
         description="Discover, track, and manage your anime watchlist with AniDoc. Explore the latest airing shows and get smart recommendations." 
@@ -261,7 +261,7 @@ export default function Home() {
       {/* ── FRAMER MOTION HERO SLIDER ── */}
       {data.airing.length > 0
         ? <HeroSlider slides={data.airing.slice(0, 6)} />
-        : loading && <div style={{ height: 480, borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }} className="skeleton" />
+        : loading && <div className={`skeleton ${styles.heroSkeleton}`} />
       }
 
       {/* ── YOUR WATCHLIST ── (only if user has items) */}
@@ -273,36 +273,33 @@ export default function Home() {
             renderItem={(entry, idx) => (
               <motion.div
                 key={entry.mal_id} custom={idx} variants={fadeUp} initial="hidden" animate="visible"
-                style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start', position: 'relative' }}
+                className={styles.wlCard}
               >
                 {/* Quick-delete button */}
-                <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 150 }}>
+                <div className={styles.wlDots}>
                   <WatchlistButton anime={entry} variant="dots" />
                 </div>
 
-                <Link to={`/anime/${entry.mal_id}`} className="card-interactive" style={{ textDecoration: 'none', display: 'block' }}>
+                <Link to={`/anime/${entry.mal_id}`} className={`card-interactive ${styles.wlLink}`}>
                   <div className="card-img-wrap">
-                    <img src={entry.image} alt={entry.title} className="card-img" />
+                    <img src={entry.image} alt={entry.title} className="card-img" loading="lazy" decoding="async" />
                     {entry.score && (
-                      <span className="badge" style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', border: '1px solid var(--badge-border)', color: '#fff', fontSize: 12, gap: 4, height: 28, padding: '0 10px', display: 'flex', alignItems: 'center' }}>
+                      <span className={`badge ${styles.wlScore}`}>
                         <Star size={11} fill="var(--primary)" color="var(--primary)" /> {entry.score}
                       </span>
                     )}
-                    <div style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      zIndex: 10, display: 'flex'
-                    }}>
+                    <div className={styles.wlBadgeRow}>
                       <WatchlistButton anime={entry} variant="badge" />
                     </div>
                   </div>
-                  <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div className={styles.wlBody}>
+                    <h3 className={styles.wlTitle}>
                       {entry.title}
                     </h3>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className={styles.wlRatingRow}>
                       {entry.userRating
-                        ? <span style={{ fontSize: 12, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 3 }}><Star size={11} fill="var(--primary)" /> {entry.userRating}/10</span>
-                        : <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>No rating yet</span>
+                        ? <span className={styles.wlRating}><Star size={11} fill="var(--primary)" /> {entry.userRating}/10</span>
+                        : <span className={styles.wlNoRating}>No rating yet</span>
                       }
                     </div>
                   </div>
@@ -326,7 +323,7 @@ export default function Home() {
           ) : (
             <Carousel 
                 items={data.recommended} 
-                renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} 
+                renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} 
             />
           )}
         </section>
@@ -337,7 +334,7 @@ export default function Home() {
         {data.airing.length === 0 && loading ? <SkeletonRow /> : data.airing.length > 0 && (
           <>
             <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="The hottest shows currently on air" linkTo="/search?filter=airing" />
-            <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>
@@ -347,7 +344,7 @@ export default function Home() {
         {data.movies.length === 0 && loading ? <SkeletonRow /> : data.movies.length > 0 && (
           <>
             <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" />
-            <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>
@@ -357,7 +354,7 @@ export default function Home() {
         {data.action.length === 0 && loading ? <SkeletonRow /> : data.action.length > 0 && (
           <>
             <SectionHeader Icon={Zap} title="Action & Adventure" subtitle="High-octane fights and epic journeys" />
-            <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>
@@ -367,7 +364,7 @@ export default function Home() {
         {data.romance.length === 0 && loading ? <SkeletonRow /> : data.romance.length > 0 && (
           <>
             <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" />
-            <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>
@@ -377,7 +374,7 @@ export default function Home() {
         {data.upcoming.length === 0 && loading ? <SkeletonRow /> : data.upcoming.length > 0 && (
           <>
             <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" />
-            <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>
@@ -387,7 +384,7 @@ export default function Home() {
         {data.top.length === 0 && loading ? <SkeletonRow /> : data.top.length > 0 && (
           <>
             <SectionHeader Icon={Trophy} title="All-Time Classics" subtitle="The highest-rated anime of all time" linkTo="/search?filter=top" />
-            <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} style={{ flex: '0 0 200px', width: 200, flexShrink: 0, scrollSnapAlign: 'start' }} />} />
+            <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
           </>
         )}
       </section>

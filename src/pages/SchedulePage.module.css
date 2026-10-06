@@ -1,0 +1,178 @@
+/* SchedulePage — extracted from inline styles. */
+
+.wrap {
+  padding-bottom: 60px;
+  font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 300px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  max-width: 540px;
+  line-height: 1.5;
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.timezone {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exportBtn {
+  padding: 8px 18px;
+  gap: 8px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  height: 38px;
+}
+
+.guide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  margin-bottom: 48px;
+  padding: 20px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.guideStep {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.guideText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.controlsRow {
+  margin-bottom: 40px;
+}
+
+.dayCol {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+}
+
+.dayScroll {
+  overflow-x: auto;
+  padding: 4px 0;
+  gap: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.dayScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dayBtn {
+  text-transform: capitalize;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.searchCol {
+  flex: 0 0 370px;
+  max-width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+}
+
+.searchField {
+  padding-left: 40px;
+  height: 44px;
+  width: 100%;
+}
+
+.resultsNote {
+  font-weight: 500;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.resultsQuery {
+  margin: 0 4px;
+}
+
+.grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.skeletonCard {
+  height: 120px;
+  border-radius: var(--radius-md);
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-tertiary);
+}
+
+.emptyIcon {
+  opacity: 0.1;
+  margin-bottom: 16px;
+}
+
+.emptyText {
+  font-size: 14px;
+}

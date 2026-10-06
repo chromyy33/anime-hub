@@ -38,7 +38,7 @@ export default function Footer() {
           <h4 className={styles.footerSectionTitle}>Credits</h4>
           <div className={styles.creditItem}>
             <span>Made with</span>
-            <Heart size={14} fill="#ef4444" color="#ef4444" aria-hidden="true" />
+            <Heart size={14} fill="var(--danger)" color="var(--danger)" aria-hidden="true" />
             <span>by</span>
             <a 
               href="https://github.com/chromyy33" 

@@ -10,7 +10,7 @@ const fadeUp = {
   visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.35, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] } }),
 };
 
-export default function AnimeCard({ anime, index, variant = 'grid', style = {} }) {
+export default function AnimeCard({ anime, index, variant = 'grid', style = {}, className = '' }) {
   const navigate = useNavigate();
   const { addToList, removeFromList, getEntry } = useWatchlist();
   const entry = getEntry(anime?.mal_id);
@@ -25,7 +25,7 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
   // Grid Variant (Used in Search/Home)
   if (variant === 'grid') {
     return (
-      <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style}>
+      <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style} className={className}>
         <Link to={`/anime/${anime.mal_id}`} className={styles.gridCardLink}>
           
           {/* Quick Add Button */}
@@ -34,7 +34,7 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
           </div>
 
           <div className={styles.cardImgWrap}>
-            <img src={anime.images?.jpg?.large_image_url} alt={anime.title} className={styles.cardImg} />
+            <img src={anime.images?.jpg?.large_image_url} alt={anime.title} className={styles.cardImg} loading="lazy" decoding="async" />
             {anime.score && (
               <span className={styles.scoreBadge}>
                 <Star size={11} fill="var(--primary)" color="var(--primary)" /> {anime.score}
@@ -69,9 +69,8 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
 
   // List Variant (Used in Schedule)
   return (
-    <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style}>
-      <Link to={`/anime/${anime.mal_id}`} className={styles.listCardLink} 
-        style={{ opacity: anime.airing === false ? 0.6 : 1 }}>
+    <motion.div custom={index} variants={fadeUp} initial="hidden" animate="visible" style={style} className={className}>
+      <Link to={`/anime/${anime.mal_id}`} className={styles.listCardLink}>
         
         {/* Quick Add Button */}
         <div className={styles.listWatchlistBtnWrap}>
@@ -79,7 +78,7 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {} }
         </div>
 
         <div className={styles.listImgWrap}>
-            <img src={anime.images?.jpg?.image_url} alt={anime.title} className={styles.listImg} />
+            <img src={anime.images?.jpg?.image_url} alt={anime.title} className={styles.listImg} loading="lazy" decoding="async" />
         </div>
         <div className={styles.listInfo}>
             <div className={styles.listTimeRow}>

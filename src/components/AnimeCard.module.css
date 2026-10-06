@@ -80,7 +80,7 @@
 
 .scoreBadge:hover {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-accent);
 }
 
 .typeBadge {
@@ -135,18 +135,18 @@
 
 .genreChip {
   font-size: 11px;
-  color: var(--primary);
-  background: rgba(16, 185, 129, 0.1);
+  color: var(--text-accent);
+  background: var(--primary-dim);
   padding: 2px 8px;
   border-radius: 4px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--primary-line);
 }
 
 .genreChip:hover {
-  background: rgba(16, 185, 129, 0.2);
+  background: var(--primary-wash);
 }
 
 /* ── List Variant (Schedule) ── */
@@ -168,6 +168,7 @@
 
 .listCardLink:hover {
   transform: translateY(-4px);
+  z-index: 100;
   box-shadow: 
     inset 0 0 0 1px var(--glass-border), 
     0 0 0 2px var(--primary), 
@@ -208,12 +209,13 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .listTime {
   font-size: 13px;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--text-accent);
 }
 
 .listTimeMeta {
@@ -228,7 +230,6 @@
   background: var(--bg-base);
   padding: 1px 5px;
   border-radius: 3px;
-  margin-left: auto;
 }
 
 .listTitle {

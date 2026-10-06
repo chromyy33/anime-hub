@@ -6,6 +6,7 @@ import { fetchWeeklySchedule } from '../utils/anilist';
 import { useWatchlist } from '../context/WatchlistContext';
 import SEO from '../components/SEO';
 import AnimeCard from '../components/AnimeCard';
+import styles from './SchedulePage.module.css';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -134,7 +135,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div style={{ paddingBottom: 60, fontFamily: "'Plus Jakarta Sans', 'Outfit', sans-serif" }}>
+    <div className={styles.wrap}>
       <SEO 
         title="Airing Schedule" 
         description="Check the weekly anime airing schedule on AniDoc. Real-time release dates and times for your favorite ongoing shows."
@@ -143,45 +144,45 @@ export default function SchedulePage() {
       
       <div className="schedule-container">
         {/* Header Area */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40, flexWrap: 'wrap', gap: 24 }}>
-          <div style={{ flex: 1, minWidth: 300 }}>
-            <h1 style={{ fontSize: 32, fontWeight: 800, fontFamily: 'Outfit', color: 'var(--text-primary)', marginBottom: 8, letterSpacing: '-0.02em' }}>
+        <div className={styles.header}>
+          <div className={styles.headerInfo}>
+            <h1 className={styles.title}>
               Airing Calendar
             </h1>
-            <p style={{ color: 'var(--text-tertiary)', fontSize: 14, maxWidth: 540, lineHeight: 1.5 }}>
+            <p className={styles.subtitle}>
               The complete weekly release schedule converted to your <strong>local 24h time</strong>.
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className={styles.headerMeta}>
+            <span className={styles.timezone}>
                 <Clock size={12} /> {Intl.DateTimeFormat().resolvedOptions().timeZone}
             </span>
-            <button onClick={downloadICS} className="btn-primary" style={{ padding: '8px 18px', gap: 8, fontSize: 13, borderRadius: 'var(--radius-sm)', height: 38 }}>
+            <button onClick={downloadICS} className={`btn-primary ${styles.exportBtn}`}>
               <Download size={16} /> Export Calendar
             </button>
           </div>
         </div>
 
         {/* Step Guide for Export */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 32, marginBottom: 48, padding: 20, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+        <div className={styles.guide}>
             <div className="guide-item">
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>1</div>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Add airing shows to <strong>"Watching"</strong></p>
+                <div className={styles.guideStep}>1</div>
+                <p className={styles.guideText}>Add airing shows to <strong>"Watching"</strong></p>
             </div>
             <div className="guide-item">
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>2</div>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Click <strong>Export Calendar</strong> above</p>
+                <div className={styles.guideStep}>2</div>
+                <p className={styles.guideText}>Click <strong>Export Calendar</strong> above</p>
             </div>
             <div className="guide-item">
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>3</div>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Sync <strong>.ics file</strong> with your calendar app</p>
+                <div className={styles.guideStep}>3</div>
+                <p className={styles.guideText}>Sync <strong>.ics file</strong> with your calendar app</p>
             </div>
         </div>
 
         {/* Day Selector & Search Row */}
-        <div className="flex flex-wrap items-center justify-between gap-lg" style={{ marginBottom: 40 }}>
+        <div className={`flex flex-wrap items-center justify-between gap-lg ${styles.controlsRow}`}>
           
-          <div style={{ flex: 1, minWidth: '300px', display: 'flex', alignItems: 'center' }}>
+          <div className={styles.dayCol}>
             {!searchQuery ? (
               <>
                 {showLeftBtn && (
@@ -193,23 +194,13 @@ export default function SchedulePage() {
                   <div 
                     ref={scrollRef}
                     onScroll={checkScroll}
-                    className="flex" 
-                    style={{ 
-                      overflowX: 'auto', 
-                      padding: '4px 0', 
-                      gap: '8px',
-                      scrollbarWidth: 'none', 
-                      msOverflowStyle: 'none',
-                      WebkitOverflowScrolling: 'touch',
-                      scrollBehavior: 'smooth',
-                    }}
+                    className={`flex ${styles.dayScroll}`}
                   >
                     {DAYS.map(day => (
                       <button
                         key={day}
                         onClick={() => setActiveDay(day)}
-                        className={`chip-filter ${activeDay === day ? 'active' : ''}`}
-                        style={{ textTransform: 'capitalize', height: 44, display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                        className={`chip-filter ${activeDay === day ? 'active' : ''} ${styles.dayBtn}`}
                       >
                         {day}
                       </button>
@@ -223,42 +214,41 @@ export default function SchedulePage() {
                 )}
               </>
             ) : (
-              <div className="text-sm text-secondary" style={{ fontWeight: 500, height: 44, display: 'flex', alignItems: 'center' }}>
-                  Showing results for <span className="text-accent" style={{ margin: '0 4px' }}>"{searchQuery}"</span> across the entire week:
+              <div className={`text-sm text-secondary ${styles.resultsNote}`}>
+                  Showing results for <span className={`text-accent ${styles.resultsQuery}`}>"{searchQuery}"</span> across the entire week:
               </div>
             )}
           </div>
 
-          <div className="navbar-search" style={{ flex: '0 0 370px', maxWidth: '100%' }}>
-            <Search size={18} className="search-icon-fixed" style={{ top: '50%', transform: 'translateY(-50%)' }} />
+          <div className={styles.searchCol}>
+            <Search size={16} color="var(--text-tertiary)" className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Search weekly lineup..."
-              className="search-input w-full"
+              className={`search-input ${styles.searchField}`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: 48, height: 44 }}
             />
           </div>
         </div>
 
         {/* Grid */}
         {loading ? (
-          <div className="grid-list" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))' }}>
+          <div className={`grid-list ${styles.grid}`}>
              {Array.from({ length: 6 }).map((_, i) => (
-               <div key={i} className="card skeleton" style={{ height: 120, borderRadius: 'var(--radius-md)' }} />
+               <div key={i} className={`card skeleton ${styles.skeletonCard}`} />
              ))}
           </div>
         ) : (
-          <div className="grid-list" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))' }}>
+          <div className={`grid-list ${styles.grid}`}>
             {activeList.length > 0 ? (
               activeList.map((anime) => (
                 <AnimeCard key={anime.mal_id} anime={anime} variant="list" />
               ))
             ) : (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 0', color: 'var(--text-tertiary)' }}>
-                  <LayoutGrid size={40} style={{ opacity: 0.1, marginBottom: 16 }} />
-                  <p style={{ fontSize: 14 }}>No results found.</p>
+              <div className={styles.empty}>
+                  <LayoutGrid size={40} className={styles.emptyIcon} />
+                  <p className={styles.emptyText}>No results found.</p>
               </div>
             )}
           </div>

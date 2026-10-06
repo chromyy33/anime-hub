@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import { BookmarkPlus, Check, Eye, Clock, ChevronDown, Trash2, MoreHorizontal } from 'lucide-react';
 import { useWatchlist } from '../context/WatchlistContext';
 import styles from './WatchlistButton.module.css';
@@ -21,15 +22,26 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   const isDots = variant === 'dots';
 
   const [open,      setOpen]      = useState(false);
+  const [menuPos,   setMenuPos]   = useState(null); // { top, left } — viewport-pinned
   const [sliderVal, setSliderVal] = useState(entry?.userRating ?? 0);
-  const ref = useRef(null);
+  const ref = useRef(null);      // trigger wrapper
+  const menuRef = useRef(null);  // portaled menu
 
   useEffect(() => { setSliderVal(entry?.userRating ?? 0); }, [entry?.userRating]);
 
   useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e) => {
+      const t = e.target;
+      if (ref.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   if (!anime) return null;
@@ -46,17 +58,55 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   const cfg = entry ? STATUS_CONFIG[entry.status] : null;
   const StatusIcon = (isIcon && inList) || isDots ? MoreHorizontal : (cfg?.Icon ?? BookmarkPlus);
 
+  // Menu placement: portaled to document.body and pinned to the trigger's
+  // bottom-left edge (original anchoring) — never trapped behind cards.
+  const MENU_GAP = 8;
+
+  const computePos = useCallback(() => {
+    const el = ref.current;
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { left: r.left, top: r.bottom + MENU_GAP };
+  }, []);
+
+  const openMenu = useCallback(() => {
+    setMenuPos(computePos());
+    setOpen(true);
+  }, [computePos]);
+
+  const closeMenu = useCallback(() => setOpen(false), []);
+
+  // Follow the trigger while open (page scroll, carousel scroll, resize).
+  // rAF-throttled: scroll fires faster than React can paint.
+  useEffect(() => {
+    if (!open) return;
+    let raf = 0;
+    const follow = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setMenuPos(computePos()));
+    };
+    window.addEventListener('scroll', follow, true);
+    window.addEventListener('resize', follow);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', follow, true);
+      window.removeEventListener('resize', follow);
+    };
+  }, [open, computePos]);
+
   const handleDirectClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!inList) addToList(anime, 'plan');
-    else setOpen(v => !v);
+    else if (open) closeMenu();
+    else openMenu();
   };
 
   const toggleDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setOpen(v => !v);
+    if (open) closeMenu();
+    else openMenu();
   };
 
   const handleStatusSelect = (e, key) => {
@@ -102,28 +152,32 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
             aria-label="Open watchlist options"
             aria-expanded={open}
           >
-            <ChevronDown size={isMinimal ? 13 : 15} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            <ChevronDown size={isMinimal ? 13 : 15} className={`${styles.chev} ${open ? styles.chevOpen : ''}`} />
           </button>
         </>
       )}
 
-      {/* ─── Dropdown ─── */}
-      <AnimatePresence>
-        {open && !isBadge && (
+      {/* ─── Dropdown: portaled straight to body (no AnimatePresence wrapper —
+          it cannot track exit lifecycles through a portal boundary; enter
+          animation still plays on mount, close is instant) ─── */}
+      {open && !isBadge && menuPos && createPortal(
           <motion.div
+            ref={menuRef}
+            key="wl-menu"
             initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className={styles.dropdownMenu}
+            className="wl-portal"
+            style={{ left: menuPos.left, top: menuPos.top }}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
             }}
             onMouseDown={e => e.stopPropagation()}
           >
+            <div className={styles.dropdownMenu}>
             {/* Status options */}
-            <div style={{ padding: '8px 0' }}>
+            <div className={styles.menuPad}>
               <div className={styles.dropdownHeader}>
                 {inList ? 'Update Status' : 'Add to list as…'}
               </div>
@@ -137,7 +191,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                   >
                     <Icon size={14} color={isActive ? 'var(--primary)' : 'var(--text-tertiary)'} aria-hidden="true" />
                     {label}
-                    {isActive && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--primary)' }} aria-hidden="true" />}
+                    {isActive && <Check size={12} className={styles.checkIcon} aria-hidden="true" />}
                   </button>
                 );
               })}
@@ -190,9 +244,10 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
                 </button>
               </div>
             )}
-          </motion.div>
+            </div>
+          </motion.div>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

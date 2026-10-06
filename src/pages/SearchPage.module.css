@@ -1,0 +1,431 @@
+/* SearchPage — extracted from inline styles. Dynamic states use
+   .open / .active / .selected so JSX stays free of style objects. */
+
+.wrap {
+  padding-bottom: 60px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 200px;
+}
+
+.resultCount {
+  margin-bottom: 6px;
+  color: var(--text-tertiary);
+}
+
+.resultTitle {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.filterToggleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clearFilters {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.filterToggle.open {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--text-accent);
+}
+
+.filterCount {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  line-height: 1.4;
+}
+
+/* ── Filter panel ── */
+.panelAnim {
+  overflow: hidden;
+}
+
+.panelCard {
+  margin-bottom: 24px;
+}
+
+.filterGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 24px;
+}
+
+.genreArea {
+  border-top: 1px solid var(--border-strong);
+  padding-top: 20px;
+}
+
+.genreHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.genreLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.genrePicked {
+  color: var(--text-accent);
+}
+
+.genreGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.panelActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-strong);
+  padding-top: 20px;
+}
+
+.cancelBtn {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Genre pill ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill.selected {
+  border-color: var(--text-accent);
+  background: var(--primary-dim);
+  color: var(--text-accent);
+}
+
+/* ── Score slider ── */
+.scoreHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.scoreLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+.scoreVal {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.scoreVal.rated {
+  color: var(--text-accent);
+}
+
+.scoreInput {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+  outline: none;
+  display: block;
+}
+
+.scoreTicks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.scoreTick {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Custom dropdown ── */
+.selectLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  display: block;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.selectAnchor {
+  position: relative;
+}
+
+.selectTrigger {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.selectTrigger.hasValue {
+  color: var(--text-primary);
+}
+
+.selectTrigger.open {
+  border-color: var(--primary);
+}
+
+.selectChevron {
+  color: var(--text-tertiary);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.selectChevron.open {
+  transform: rotate(180deg);
+}
+
+.selectMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bg-solid);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.selectOption {
+  width: 100%;
+  padding: 9px 12px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+
+.selectOption:hover {
+  background: var(--bg-surface-hover);
+}
+
+.selectOption.active {
+  background: var(--primary-dim);
+  color: var(--text-accent);
+}
+
+/* ── Active filter chips ── */
+.activeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.activeChip {
+  background: var(--primary-dim);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+}
+
+/* ── Skeleton / states ── */
+.skelCard {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.skelMedia {
+  padding-top: 145%;
+}
+
+.skelBody {
+  padding: 12px;
+}
+
+.skelBar {
+  height: 13px;
+  background: var(--border-strong);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skelBarShort {
+  height: 11px;
+  background: var(--border-subtle);
+  border-radius: 4px;
+  width: 55%;
+}
+
+.emptyWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+  color: var(--text-tertiary);
+}
+
+.emptyIcon {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.emptyRetry {
+  margin-top: 12px;
+  color: var(--text-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.loadError {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--danger);
+  font-size: 15px;
+}
+
+.browseHint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--text-tertiary);
+}
+
+.browseHintText {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.pageBtnDim {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageBtnLive {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.pageNum {
+  padding: 0.6em 1em;
+  min-width: 2.5em;
+}
+
+.pageEllipsis {
+  padding: 0 6px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.yearInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.yearLabel {
+  margin-bottom: 6px;
+}

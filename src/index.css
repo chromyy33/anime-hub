@@ -3,19 +3,35 @@
 /* ═══════════════════════════════════════════════════════════════════════
    DESIGN TOKENS — Tinted-neutral palette inspired by Linear / Vercel
    ═══════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Brand - Light Mode Default */
-  --primary:        #059669;   /* Emerald 600 - Better contrast on light */
+  /* Brand - Light Mode Default
+     --primary fills stay emerald-600 (brand recognition).
+     Small emerald TEXT uses --primary-ink / --text-accent (AA ≥ 4.5:1 on light).
+     White label text on --primary is 3.77:1 — acceptable for bold UI labels
+     (passes 3:1 non-text/UI), hover deepens to --primary-hover (5.48:1). */
+  --primary:        #059669;   /* Emerald 600 - fills, borders, rings */
   --primary-hover:  #047857;   /* Emerald 700 */
-  --primary-dim:    rgba(5, 150, 105, 0.10);
+  --primary-ink:    #047857;   /* Emerald 700 - small text on light surfaces (5.48:1 on white) */
+  --primary-dim:    rgba(5, 150, 105, 0.10);   /* subtle wash: chips, selected rows */
+  --primary-wash:   rgba(5, 150, 105, 0.16);   /* emphasis wash: hovers */
+  --primary-line:   rgba(5, 150, 105, 0.35);   /* emerald borders on light */
+  --focus-ring:     rgba(5, 150, 105, 0.35);   /* keyboard focus ring (WCAG 2.4.11) */
+  --danger:         #dc2626;   /* Red 600 - AA on light (4.83:1 on white) */
+  --danger-dim:     rgba(220, 38, 38, 0.12);
+  --menu-border:    #cbd5e1;   /* opaque menu outlines — visible on solid surfaces */
+  --scrim:          rgba(2, 6, 23, 0.80);      /* badges / labels over imagery */
+  --scrim-soft:     rgba(2, 6, 23, 0.60);
+  --text-on-primary:#ffffff;
   --shadow-xl:      0 20px 40px -8px rgba(2, 8, 23, 0.18);
   /* ── LIGHT THEME — Glassmorphic ── */
   --bg-base:          #f8fafc;   /* slate-50 — page canvas */
-  --bg-surface:       rgba(255, 255, 255, 0.52);  /* Brighter, more translucent */
-  --bg-surface-hover: rgba(255, 255, 255, 0.65);  
-  --bg-surface-active:rgba(255, 255, 255, 0.45);  
-  --bg-elevated:      rgba(255, 255, 255, 0.75);  /* More opaque for text clarity */
-  --glass-border:     rgba(255, 255, 255, 1.0);   /* Vivid white inner reflection */
+  --bg-surface:       rgba(255, 255, 255, 0.60);  /* raised opacity for text clarity over blur */
+  --bg-surface-hover: rgba(255, 255, 255, 0.72);
+  --bg-surface-active:rgba(255, 255, 255, 0.50);
+  --bg-elevated:      rgba(255, 255, 255, 0.82);  /* More opaque for text clarity */
+  --bg-solid:         #ffffff;   /* opaque menu surface — dropdowns, popovers */
+  --glass-border:     rgba(255, 255, 255, 0.9);   /* softened inner reflection (was 1.0 bloom) */
   --glass-blur:       48px;
 
   /* shadcn foreground scale */
@@ -23,7 +39,7 @@
   --text-secondary: #0f172a;   /* slate-900                          */
   --text-tertiary:  #475569;   /* slate-600  — muted-foreground (AA compliant) */
   --text-on-primary:#ffffff;
-  --text-accent:    #059669;   /* Emerald 600 — for readable green text on white */
+  --text-accent:    #047857;   /* Emerald 700 — AA emerald text on light (was #059669 @ 3.77:1) */
 
   /* shadcn border */
   --border-subtle:  #e2e8f0;   /* slate-200                          */
@@ -82,21 +98,34 @@
 }
 
 [data-theme='dark'] {
-  /* ── DARK THEME — Glassmorphic ── */
-  --bg-base:          #0c0e12;   /* deepest background */
-  --bg-surface:       rgba(22, 25, 31, 0.7);  /* Restored translucency */
-  --bg-surface-hover: rgba(30, 34, 41, 0.8);  
-  --bg-surface-active:rgba(22, 25, 31, 0.6);  
-  --bg-elevated:      rgba(28, 32, 38, 0.75); /* Balanced for blur + text */
+  /* ── DARK THEME — Glassmorphic ──
+     Elevation reads through LIGHTER fills (shadows are inert on near-black).
+     --text-on-primary is deep emerald-950 ink: 5.97:1 on fills (white was 2.54:1). */
+  --bg-base:          #0a0c10;   /* deepened canvas for layer separation */
+  --bg-surface:       rgba(24, 28, 35, 0.72);
+  --bg-surface-hover: rgba(33, 39, 47, 0.80);
+  --bg-surface-active:rgba(24, 28, 35, 0.62);
+  --bg-elevated:      rgba(30, 35, 42, 0.80); /* Balanced for blur + text */
+  --bg-solid:         #1a1e25;   /* opaque menu surface — dropdowns, popovers */
   --glass-border:     rgba(255, 255, 255, 0.1); 
 
   --text-primary:   #f0f6fc;   /* headings (lighter for crispness) */
   --text-secondary: #c9d1d9;   /* body text */
   --text-tertiary:  #9ba1b0;   /* muted labels (bumped for better contrast) */
-  --text-accent:    #10b981;   /* Emerald 500 */
+  --text-accent:    #10b981;   /* Emerald 500 (7.61:1 on base) */
+  --text-on-primary:#022c22;   /* Emerald 950 ink on fills — never white in dark */
   --primary:        #10b981;   /* Emerald 500 - Vibrant glow on dark */
   --primary-hover:  #34d399;   /* Emerald 400 */
+  --primary-ink:    #34d399;   /* Emerald 400 - micro-labels on dark (10.05:1 on base) */
   --primary-dim:    rgba(16, 185, 129, 0.12);
+  --primary-wash:   rgba(16, 185, 129, 0.18);
+  --primary-line:   rgba(16, 185, 129, 0.35);
+  --focus-ring:     rgba(16, 185, 129, 0.45);
+  --danger:         #f87171;   /* Red 400 - AA on dark (6.98:1 on base) */
+  --danger-dim:     rgba(248, 113, 113, 0.14);
+  --menu-border:    rgba(255, 255, 255, 0.16);   /* visible outline on solid menus in dark */
+  --scrim:          rgba(2, 6, 23, 0.80);
+  --scrim-soft:     rgba(2, 6, 23, 0.60);
   --shadow-xl:      0 20px 40px -8px rgba(0, 0, 0, 0.55);
 
   --border-subtle:  #1e2029;   /* very subtle dividers */
@@ -114,6 +143,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    RESET
    ═══════════════════════════════════════════════════════════════════════ */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -171,6 +201,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
    ═══════════════════════════════════════════════════════════════════════ */
 
 
+
 /* ── App Container ───────────────────────────────────────────────── */
 .app-container {
   max-width: var(--max-app-width);
@@ -208,9 +239,10 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    BUTTONS
    ═══════════════════════════════════════════════════════════════════════ */
+
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border: none;
   padding: 0.6em 1.2em;
   border-radius: var(--radius-sm);
@@ -278,6 +310,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    INPUTS
    ═══════════════════════════════════════════════════════════════════════ */
+
 .search-input {
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
@@ -292,13 +325,14 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 .search-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-dim), inset 0 0 0 1px var(--glass-border);
+  box-shadow: 0 0 0 3px var(--focus-ring), inset 0 0 0 1px var(--glass-border);
 }
 .search-input::placeholder { color: var(--text-tertiary); }
 
 /* ═══════════════════════════════════════════════════════════════════════
    CARDS
    ═══════════════════════════════════════════════════════════════════════ */
+
 
 /* Static info card */
 .card {
@@ -333,6 +367,15 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
   background: var(--bg-surface-hover);
 }
 
+/* Watchlist menu portal — viewport-pinned shell. The menu lives in
+   document.body, above every card stacking context, so it can never
+   render behind cards or be clipped by scroll containers. */
+.wl-portal {
+  position: fixed;
+  z-index: 3000;
+  width: 210px;
+}
+
 /* Card image wrapper (16:10 ratio) */
 .card-img-wrap {
   position: relative;
@@ -356,6 +399,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    CHIPS & BADGES
    ═══════════════════════════════════════════════════════════════════════ */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -373,7 +417,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
   letter-spacing: 0.01em;
   transition: border-color 0.15s, color 0.15s;
 }
-.badge:hover { border-color: var(--primary); color: var(--primary); }
+.badge:hover { border-color: var(--primary); color: var(--text-accent); }
 
 /* Genre chip — emerald accent */
 .chip-genre {
@@ -385,13 +429,13 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
   font-weight: 600;
   background: var(--primary-dim);
   color: var(--text-accent);
-  border: 1px solid rgba(16, 185, 129, 0.20);
+  border: 1px solid var(--primary-line);
   white-space: nowrap;
   text-decoration: none;
   letter-spacing: 0.01em;
   transition: background 0.15s;
 }
-.chip-genre:hover { background: rgba(16, 185, 129, 0.18); }
+.chip-genre:hover { background: var(--primary-wash); }
 
 /* Filter chip (schedule day buttons, language tabs) */
 .chip-filter {
@@ -408,19 +452,20 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 .chip-filter:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--primary-dim);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+  background: var(--primary-wash);
 }
 .chip-filter.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border-color: var(--primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
    CARD INNER COMPONENTS (Stat rows, Info rows, Section headers)
    ═══════════════════════════════════════════════════════════════════════ */
+
 
 /* Used inside sidebar cards for label → value pairs */
 .info-row {
@@ -462,6 +507,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    PAGE STRUCTURE
    ═══════════════════════════════════════════════════════════════════════ */
+
 
 /* Page header (title + subtitle) */
 .page-header { margin-bottom: 40px; }
@@ -520,6 +566,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    UTILITY FLEXBOX / LAYOUT HELPERS
    ═══════════════════════════════════════════════════════════════════════ */
+
 .flex           { display: flex; }
 .flex-col       { display: flex; flex-direction: column; }
 .flex-center    { display: flex; align-items: center; justify-content: center; }
@@ -527,6 +574,9 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 .flex-wrap      { flex-wrap: wrap; }
 .items-center   { align-items: center; }
 .items-start    { align-items: flex-start; }
+.items-end      { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between{ justify-content: space-between; }
 .justify-end    { justify-content: flex-end; }
 .gap-xs  { gap: var(--spacing-xs); }
 .gap-sm  { gap: var(--spacing-sm); }
@@ -539,6 +589,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    UTILITY LAYOUT HELPERS (Class-based Rhythm)
    ═══════════════════════════════════════════════════════════════════════ */
+
 .page-container {
   display: flex;
   flex-direction: column;
@@ -585,6 +636,14 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 .text-base{ font-size: var(--text-base); }
 .text-md  { font-size: var(--text-md); }
 .text-lg  { font-size: var(--text-lg); }
+/* Semantic text colors — these classes are used across pages, keep them mapped */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-muted { color: var(--text-tertiary); }
+.text-accent { color: var(--text-accent); }
+.text-danger { color: var(--danger); }
+.no-underline { text-decoration: none; }
 .text-center { text-align: center; }
 .font-semibold { font-weight: 600; }
 .font-bold     { font-weight: 700; }
@@ -595,6 +654,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    HERO / BANNER
    ═══════════════════════════════════════════════════════════════════════ */
+
 .hero-banner {
   position: relative;
   border-radius: var(--radius-xl);
@@ -661,8 +721,17 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    CAROUSEL / HORIZONTAL SCROLL
    ═══════════════════════════════════════════════════════════════════════ */
+
 .scroll-item {
   flex: 0 0 220px;
+  scroll-snap-align: start;
+}
+
+/* Standard carousel cell for 200px poster cards (Home, details pages) */
+.carousel-item {
+  flex: 0 0 200px;
+  width: 200px;
+  flex-shrink: 0;
   scroll-snap-align: start;
 }
 
@@ -687,7 +756,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 }
 .slider-btn:hover {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border-color: var(--primary);
   transform: translateY(-50%) scale(1.1);
 }
@@ -703,6 +772,7 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 /* ═══════════════════════════════════════════════════════════════════════
    INPUT RANGE (Watchlist rating slider)
    ═══════════════════════════════════════════════════════════════════════ */
+
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
@@ -733,6 +803,7 @@ input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.15); }
 /* ═══════════════════════════════════════════════════════════════════════
    SCROLLBARS (global)
    ═══════════════════════════════════════════════════════════════════════ */
+
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -742,6 +813,7 @@ input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.15); }
 /* ═══════════════════════════════════════════════════════════════════════
    ANIMATIONS
    ═══════════════════════════════════════════════════════════════════════ */
+
 @keyframes pulse {
   0%, 100% { 
     background-color: var(--bg-surface-hover);
@@ -786,6 +858,7 @@ input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.15); }
 /* ═══════════════════════════════════════════════════════════════════════
    SWIPER DOTS
    ═══════════════════════════════════════════════════════════════════════ */
+
 .swiper-pagination-bullet {
   background: rgba(255,255,255,0.35) !important;
   opacity: 1 !important;
@@ -807,10 +880,10 @@ input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.15); }
   align-items: center;
   gap: 12px;
 }
-
 /* ═══════════════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
    ═══════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 1280px) {
   .hero-banner { height: 440px; }
 }
@@ -903,6 +976,7 @@ input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 
 
+
 /* 375px specific - min supported */
 @media (max-width: 375px) {
   .hero-banner { height: 220px; }
@@ -958,6 +1032,7 @@ input[type="range"]:active::-webkit-slider-thumb {
 /* ═══════════════════════════════════════════════════════════════════════
    TOAST NOTIFICATIONS (Glassmorphism)
    ═══════════════════════════════════════════════════════════════════════ */
+
 .Toastify__toast {
   background: var(--bg-surface) !important;
   backdrop-filter: blur(var(--glass-blur)) !important;
@@ -1021,340 +1096,13 @@ input[type="range"]:active::-webkit-slider-thumb {
    SCHEDULE PAGE & CALENDAR
    ═══════════════════════════════════════════════════════════════════════ */
 .schedule-container {
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
 }
-
-.schedule-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-  gap: 24px;
-}
-
-.schedule-title {
-  font-size: 32px;
-  font-weight: 800;
-  font-family: 'Outfit', sans-serif;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-
-.schedule-subtitle {
-  color: var(--text-tertiary);
-  font-size: 14px;
-  max-width: 540px;
-  line-height: 1.5;
-}
-
-.schedule-meta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.timezone-badge {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.guide-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 32px;
-  margin-bottom: 48px;
-  padding: 24px;
-  background: var(--bg-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-}
-
-.guide-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.guide-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 800;
-  flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-}
-
-.guide-text {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.schedule-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-.day-selector-wrap {
-  flex: 1;
-  min-width: 300px;
-  display: flex;
-  align-items: center;
-}
-
-.day-scroll-viewport {
-  overflow-x: auto;
-  padding: 4px 0;
-  gap: 8px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  scroll-behavior: smooth;
-  display: flex;
-  align-items: center;
-}
-
-.day-scroll-viewport::-webkit-scrollbar {
-  display: none;
-}
-
-.schedule-search-wrap {
-  flex: 0 0 370px;
-  max-width: 100%;
-}
-
-.schedule-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  gap: 20px;
-}
-
-.schedule-card {
-  display: flex;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  height: 124px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.schedule-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary);
-  box-shadow: var(--shadow-lg);
-  background: var(--bg-surface-hover);
-}
-
-.schedule-card__img {
-  width: 84px;
-  height: 100%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.schedule-card__body {
-  flex: 1;
-  padding: 14px 16px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.schedule-card__title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.schedule-card__time {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.schedule-card__meta {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-@media (max-width: 640px) {
-  .schedule-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .schedule-search-wrap {
-    flex: 1;
-  }
-}
-
-
-
-/* ═══════════════════════════════════════════════════════════════════════
-   HERO SLIDER
-   ═══════════════════════════════════════════════════════════════════════ */
-.hero-slider {
-  position: relative;
-  height: 480px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--bg-surface);
-}
-
-.hero-slide {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
-}
-
-.hero-vignette-bottom {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.4) 50%, transparent 100%);
-  z-index: 2;
-}
-
-.hero-vignette-top {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 120px;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
-  z-index: 2;
-  opacity: 0.6;
-}
-
-.hero-content-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.hero-badge-row {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  z-index: 10;
-}
-
-.hero-title {
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 900;
-  color: #fff;
-  margin-bottom: 12px;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-.hero-synopsis {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
-  max-width: 600px;
-  margin-bottom: 28px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   THEME TOGGLE (Mobile)
-   ═══════════════════════════════════════════════════════════════════════ */
-.theme-toggle-mobile {
-  width: 100%;
-  padding: 16px;
-  border-radius: var(--radius-md);
-  background: var(--bg-surface-hover);
-  border: 1px solid var(--border-strong);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--text-primary);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.toggle-track {
-  width: 40px;
-  height: 20px;
-  border-radius: 20px;
-  background: var(--border-strong);
-  position: relative;
-  transition: background 0.3s ease;
-}
-
-.toggle-track.active {
-  background: var(--primary);
-}
-
-.toggle-thumb {
-  position: absolute;
-  top: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  transition: left 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
 /* ═══════════════════════════════════════════════════════════════════════
    SCROLL MASK & UTILITIES
    ═══════════════════════════════════════════════════════════════════════ */
+
 .scroll-mask {
   position: relative;
   overflow: hidden;
@@ -1399,528 +1147,8 @@ input[type="range"]:active::-webkit-slider-thumb {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ANIME CARD VARIANTS
+   SHARED CONTROLS (kept: used by DSPill + filter panels)
    ═══════════════════════════════════════════════════════════════════════ */
-.anime-card-grid {
-  text-decoration: none;
-  display: block;
-  position: relative;
-}
-
-.anime-card-list {
-  text-decoration: none;
-  display: flex;
-  gap: 16px;
-  padding: 14px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.anime-card-list.finished {
-  opacity: 0.6;
-}
-
-.anime-card__badge-score {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--badge-border);
-  color: #fff;
-  font-size: 12px;
-  height: 28px;
-  padding: 0 10px;
-  gap: 4px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  border-radius: var(--radius-sm);
-}
-
-.anime-card__badge-type {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 0 10px;
-  border-radius: 4px;
-  height: 28px;
-  background: rgba(15, 23, 42, 0.8);
-  color: #fff;
-  border: 1px solid var(--badge-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  letter-spacing: 0.04em;
-  display: flex;
-  align-items: center;
-  z-index: 5;
-}
-
-.anime-card__body {
-  padding: 14px 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.anime-card__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 2px;
-}
-
-.anime-card__meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.anime-card__genre-pill {
-  font-size: 11px;
-  color: var(--primary);
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.anime-card__genre-pill:hover {
-  background: rgba(16, 185, 129, 0.2);
-}
-
-.anime-card__quick-add {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--bg-base);
-  color: var(--text-tertiary);
-  border: 1px solid var(--border-subtle);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  transform: none;
-}
-
-.anime-card__quick-add.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   WATCHLIST BUTTON & DROPDOWN
-   ═══════════════════════════════════════════════════════════════════════ */
-.wl-btn-wrap {
-  position: relative;
-  display: flex;
-}
-
-.wl-btn-wrap.full-width {
-  width: 100%;
-}
-
-.wl-btn-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: 1px solid var(--badge-border);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
-}
-
-.wl-btn-icon:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  transform: scale(1.1);
-}
-
-.wl-btn-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 30px;
-  width: 100%;
-  font-weight: 800;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  pointer-events: none;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.wl-btn-main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
-
-.wl-btn-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-}
-
-.wl-btn-divider {
-  width: 1px;
-  background: var(--border-strong);
-  flex-shrink: 0;
-  align-self: stretch;
-}
-
-.wl-dropdown {
-  position: absolute;
-  z-index: 1000;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.1), transparent), var(--bg-elevated);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid var(--badge-border);
-  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  width: 210px;
-  overflow: hidden;
-  padding: 8px 0;
-}
-
-.wl-dropdown-label {
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-}
-
-.wl-dropdown-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: none;
-  cursor: pointer;
-  background: transparent;
-  font-size: 13px;
-  text-align: left;
-  transition: background 0.15s ease, color 0.15s ease;
-  color: var(--text-primary);
-}
-
-.wl-dropdown-item:hover {
-  background: rgba(16, 185, 129, 0.12);
-}
-
-.wl-dropdown-item.active {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.wl-rating-section {
-  border-top: 1px solid var(--border-subtle);
-  padding: 14px;
-}
-
-.wl-remove-section {
-  border-top: 1px solid var(--border-subtle);
-  padding: 6px 8px;
-}
-
-.wl-remove-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-tertiary);
-  font-size: 12px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.wl-remove-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: rgb(239, 68, 68);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   ANIME DETAILS PAGE
-   ═══════════════════════════════════════════════════════════════════════ */
-.details-poster-wrap {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-}
-
-.details-poster-img {
-  width: 100%;
-  display: block;
-  transition: transform 0.5s ease;
-}
-
-.details-poster-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-  display: flex;
-  justify-content: space-between;
-  color: #fff;
-}
-
-.details-streaming-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-top: 24px;
-}
-
-.details-theme-card {
-  padding: 20px;
-  margin-top: 24px;
-}
-
-.details-theme-item {
-  font-size: 13px;
-  color: var(--text-primary);
-  text-decoration: none;
-  display: flex;
-  align-items: flex-start;
-  padding: 8px;
-  background: var(--bg-surface-hover);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-  gap: 8px;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.details-theme-item:hover {
-  border-color: var(--primary);
-  background: var(--bg-surface-active);
-}
-
-.details-hero {
-  margin-bottom: 32px;
-}
-
-.details-hero-title {
-  font-size: 44px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  color: var(--text-primary);
-}
-
-.details-hero-subtitle {
-  font-size: 18px;
-  color: var(--text-tertiary);
-  font-weight: 400;
-  margin-bottom: 20px;
-}
-
-.details-trailer-container {
-  position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
-  overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 40px;
-}
-
-.details-related-card {
-  text-decoration: none;
-  display: flex;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.details-related-card:hover {
-  border-color: var(--primary);
-  transform: translateX(4px);
-}
-
-.details-related-pill {
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  transition: all 0.15s ease;
-}
-
-.details-related-pill:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.details-episode-card {
-  display: flex;
-  gap: 16px;
-  padding: 12px 16px;
-  align-items: center;
-  transition: background 0.2s ease;
-}
-
-.details-episode-card:hover {
-  background: var(--bg-surface-hover);
-}
-
-.details-review-card {
-  padding: 20px;
-  transition: transform 0.3s ease;
-}
-
-.details-review-card:hover {
-  transform: translateY(-4px);
-}
-
-.details-char-card {
-  flex: 0 0 340px;
-  display: flex;
-  flex-direction: row;
-  height: 100px;
-  text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-}
-
-.details-char-img {
-  width: 72px;
-  height: 100%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CHARACTER DETAILS PAGE
-   ═══════════════════════════════════════════════════════════════════════ */
-.char-poster-wrap {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-}
-
-.char-poster-img {
-  width: 100%;
-  display: block;
-  min-height: 400px;
-  object-fit: cover;
-}
-
-.char-anime-item {
-  text-decoration: none;
-  display: flex;
-  background: var(--bg-surface);
-  padding: 12px 16px;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.char-anime-item:last-child {
-  border-bottom: none;
-}
-
-.char-anime-item:hover {
-  background: var(--bg-surface-hover);
-}
-
-.char-va-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-.char-va-card {
-  display: flex;
-  gap: 14px;
-  padding: 12px;
-  align-items: center;
-  transition: transform 0.2s ease;
-}
-
-.char-va-card:hover {
-  transform: translateY(-2px);
-}
-
-.char-va-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid var(--border-subtle);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SEARCH & FILTERS
-   ═══════════════════════════════════════════════════════════════════════ */
-.search-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-}
 
 .filter-panel {
   margin-bottom: 24px;
@@ -1934,7 +1162,7 @@ input[type="range"]:active::-webkit-slider-thumb {
   border-radius: 99px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-strong);
   background: var(--bg-surface);
   color: var(--text-tertiary);
   cursor: pointer;
@@ -1943,720 +1171,36 @@ input[type="range"]:active::-webkit-slider-thumb {
 
 .genre-pill.selected {
   border-color: var(--primary);
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--text-accent);
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   APP SHELL (extracted from App.jsx inline styles)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-.filter-select-wrap {
-  position: relative;
-}
-
-.filter-select-trigger {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.filter-select-trigger:hover {
-  border-color: var(--primary);
-}
-
-.filter-select-trigger.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
-}
-
-.filter-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  backdrop-filter: blur(var(--glass-blur));
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-}
-
-.filter-dropdown-item {
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background 0.1s ease;
-}
-
-.filter-dropdown-item:hover {
-  background: var(--bg-surface-hover);
-}
-
-.filter-dropdown-item.selected {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--primary);
-}
-
-.score-slider-input {
-  width: 100%;
-  accent-color: var(--primary);
-  cursor: pointer;
-  outline: none;
-  display: block;
-}
-
-.search-empty {
+.app-shell {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 260px;
-  color: var(--text-tertiary);
-  text-align: center;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   HOME PAGE & HERO SLIDER
-   ═══════════════════════════════════════════════════════════════════════ */
-.hero-slider-wrap {
-  position: relative;
-  height: 480px;
+.app-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Route-change fallback while a lazy page chunk loads */
+.route-fallback {
+  height: 320px;
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: 48px;
-}
-
-.hero-slider-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
-}
-
-.hero-slider-overlay-bottom {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.45) 45%, rgba(2,6,23,0) 100%);
-}
-
-.hero-slider-overlay-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%);
-  opacity: 0.6;
-}
-
-.hero-slider-content {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-}
-
-.hero-slider-chips {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.hero-slider-chip-airing {
-  background: var(--primary);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 4px;
-  letter-spacing: 0.06em;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.hero-slider-chip-airing .pulse-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #fff;
-  display: inline-block;
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-.hero-slider-main-text {
-  position: absolute;
-  bottom: 40px;
-  left: 24px;
-  right: 24px;
-  max-width: 800px;
-}
-
-.hero-slider-title {
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 900;
-  color: #fff;
-  margin-bottom: 12px;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.hero-slider-description {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
-  margin-bottom: 28px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 600px;
-}
-
-.hero-slider-dot-nav {
-  position: absolute;
-  bottom: 20px;
-  right: 28px;
-  z-index: 10;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.hero-slider-dot {
-  height: 8px;
-  border-radius: 99px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.35);
-  padding: 0;
-}
-
-.hero-slider-dot.active {
-  width: 24px;
-  background: var(--primary);
-}
-
-.watchlist-card-content {
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.watchlist-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skeleton-row-item {
-  flex: 0 0 200px;
-  height: 300px;
-  border-radius: 8px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  opacity: 0.6;
-}
-
-
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CAROUSEL COMPONENTS
-   ═══════════════════════════════════════════════════════════════════════ */
-.carousel-wrapper {
-  margin-bottom: 40px;
-}
-
-.carousel-title {
-  font-size: 22px;
-  margin-bottom: 20px;
-}
-
-.carousel-container {
-  position: relative;
-}
-
-.carousel-scroll-area {
-  overflow-x: auto;
-  display: flex;
-  gap: 16px;
-  padding: 4px 0 16px;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-}
-
-.carousel-scroll-area::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for Chrome/Safari */
-}
-
-.carousel-scroll-area.dragging {
-  cursor: grabbing !important;
-  scroll-behavior: auto;
-}
-
-.carousel-scroll-area.grabbable {
-  cursor: grab;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FOOTER COMPONENTS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-
-/* ═══════════════════════════════════════════════════════════════════════
-   ANIME CARD COMPONENTS
-   ═══════════════════════════════════════════════════════════════════════ */
-.anime-card-badge-score {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--badge-border);
-  color: #fff;
-  font-size: 12px;
-  height: 28px;
-  padding: 0 10px;
-  gap: 4px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-}
-
-.anime-card-badge-type {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 0 10px;
-  border-radius: 4px;
-  height: 28px;
-  background: rgba(15, 23, 42, 0.8);
-  color: #fff;
-  border: 1px solid var(--badge-border);
-  backdrop-filter: blur(12px);
-  letter-spacing: 0.04em;
-  display: flex;
-  align-items: center;
-  z-index: 5;
-}
-
-.anime-card-content {
-  padding: 14px 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.anime-card-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 2px;
-}
-
-.anime-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.anime-card-year {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-}
-
-.anime-card-genre-pill {
-  font-size: 11px;
-  color: var(--primary);
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.anime-card-genre-pill:hover {
-  background: rgba(16, 185, 129, 0.2);
-}
-
-/* List Variant */
-.anime-card-list {
-  text-decoration: none;
-  display: flex;
-  gap: 16px;
-  padding: 14px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.anime-card-list.finished {
-  opacity: 0.6;
-}
-
-.anime-card-list-quick-add {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
-  border: 1px solid var(--border-subtle);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  transform: none;
-}
-
-.anime-card-list-quick-add.active {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--primary);
-  color: #fff;
-}
-
-.anime-card-list-quick-add.inactive {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--bg-base);
-  color: var(--text-tertiary);
-}
-
-.anime-card-list-img-wrap {
-  width: 85px;
-  height: 115px;
-  flex-shrink: 0;
-}
-
-.anime-card-list-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-.anime-card-list-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.anime-card-list-time-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.anime-card-list-time {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-}
-
-.anime-card-list-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.anime-card-list-genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.status-finished-badge {
-  font-size: 10px;
-  color: var(--text-tertiary);
-  background: var(--bg-base);
-  padding: 1px 5px;
-  border-radius: 3px;
-  margin-left: auto;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SEARCH PAGE COMPONENTS
-   ═══════════════════════════════════════════════════════════════════════ */
-.search-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.search-header-info {
-  flex: 1;
-  min-width: 200px;
-}
-
-.search-count {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  margin-bottom: 6px;
-}
-
-.filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-strong);
-  color: var(--text-primary);
-}
-
-.filter-btn.active {
-  border-color: var(--primary);
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--primary);
-}
-
-.filter-badge {
-  background: var(--primary);
-  color: #fff;
-  border-radius: 99px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 6px;
-  line-height: 1.4;
-}
-
-.filter-panel-wrapper {
   margin-bottom: 24px;
 }
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 24px;
-  margin-bottom: 24px;
+/* Scrollbar for the contained animeography list */
+.anime-list::-webkit-scrollbar {
+  width: 4px;
 }
-
-.genre-selection-area {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 20px;
-}
-
-.genre-pill-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 140px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.genre-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  color: var(--text-tertiary);
-}
-
-.genre-pill.selected {
-  border-color: var(--primary);
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--primary);
-}
-
-.score-slider-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.score-slider-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-}
-
-.score-slider-value {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.score-slider-range {
-  width: 100%;
-  accent-color: var(--primary);
-  cursor: pointer;
-  outline: none;
-  display: block;
-}
-
-.filter-select-label {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  display: block;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
-}
-
-.filter-select-button {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-tertiary);
-}
-
-.filter-select-button.has-value {
-  color: var(--text-primary);
-}
-
-.filter-select-button.open {
-  border-color: var(--primary);
-}
-
-.filter-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent), var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: var(--radius-sm);
-  box-shadow: inset 0 0 0 1px var(--glass-border), var(--shadow-lg);
-  overflow: hidden;
-}
-
-.filter-option {
-  width: 100%;
-  padding: 9px 12px;
-  text-align: left;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: inherit;
-  transition: background 0.1s;
-}
-
-.filter-option:hover {
-  background: var(--bg-surface-hover);
-}
-
-.filter-option.active {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--primary);
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 48px;
-}
-
-.pagination-ellipsis {
-  padding: 0 6px;
-  color: var(--text-tertiary);
-  font-size: 14px;
-}
-
-.pagination-btn {
-  padding: 0.6em 1em;
-  min-width: 2.5em;
-}
-
-/* Character Details Specific Styles */
-.va-tab { 
-  transition: all 0.2s; 
-  border-bottom: 2px solid transparent; 
-}
-.va-tab.active { 
-  color: var(--primary); 
-  border-bottom-color: var(--primary); 
-}
-.anime-list::-webkit-scrollbar { 
-  width: 4px; 
-}
-.anime-list::-webkit-scrollbar-thumb { 
-  background: var(--border-strong); 
-  border-radius: 10px; 
+.anime-list::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
 }

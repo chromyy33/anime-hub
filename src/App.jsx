@@ -1,16 +1,18 @@
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, memo, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Search, Calendar, Moon, Sun, X,
   Star, Clock, Menu, TrendingUp
 } from 'lucide-react';
-import Home from './pages/Home';
-import AnimeDetails from './pages/AnimeDetails';
-import SearchPage from './pages/SearchPage';
-import GenrePage from './pages/GenrePage';
-import SchedulePage from './pages/SchedulePage';
-import CharacterDetails from './pages/CharacterDetails';
+// Route-split: each page loads on demand instead of bloating the initial bundle.
+const Home = lazy(() => import('./pages/Home'));
+const AnimeDetails = lazy(() => import('./pages/AnimeDetails'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const GenrePage = lazy(() => import('./pages/GenrePage'));
+const SchedulePage = lazy(() => import('./pages/SchedulePage'));
+const CharacterDetails = lazy(() => import('./pages/CharacterDetails'));
+const DesignSystemPage = lazy(() => import('./design-system'));
 import Footer from './components/Footer';
 import { fetchSuggestions, fetchAnimeOfDay } from './utils/anilist';
 import styles from './components/Navbar.module.css';
@@ -226,7 +228,7 @@ function Navbar({ isDark, setIsDark, setMobileOpen, mobileOpen }) {
 
       {/* Mobile Toggle */}
       <div className={styles.mobileOnly}>
-        <button className="icon-btn" onClick={() => setMobileOpen(!mobileOpen)} style={{ zIndex: 1100 }}>
+        <button className={`icon-btn ${styles.menuToggle}`} onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -290,7 +292,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="app-shell">
         <Navbar isDark={isDark} setIsDark={setIsDark} setMobileOpen={setMobileOpen} mobileOpen={mobileOpen} />
         <MobileMenu 
           open={mobileOpen}
@@ -299,7 +301,8 @@ function App() {
           isDark={isDark}
           setIsDark={setIsDark}
         />
-        <main className="app-container" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <main className="app-container app-main">
+          <Suspense fallback={<div className="skeleton route-fallback" />}>
           <Routes>
             <Route path="/"           element={<Home />} />
             <Route path="/anime/:id"  element={<AnimeDetails />} />
@@ -307,7 +310,9 @@ function App() {
             <Route path="/genre/:id/:name" element={<GenrePage />} />
             <Route path="/schedule"   element={<SchedulePage />} />
             <Route path="/character/:id" element={<CharacterDetails />} />
+            <Route path="/design-system" element={<DesignSystemPage />} />
           </Routes>
+          </Suspense>
           <Footer />
         </main>
         <ToastContainer 

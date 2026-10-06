@@ -77,8 +77,15 @@ export function WatchlistProvider({ children }) {
   const isInList = useCallback((malId) => !!watchlist[malId], [watchlist]);
   const allEntries = useMemo(() => Object.values(watchlist), [watchlist]);
 
+  // Memoized: unrelated parent renders (theme toggle, menu) must not
+  // cascade into every card on the page through a fresh object identity.
+  const value = useMemo(() => ({
+    watchlist, allEntries, addToList, removeFromList,
+    setStatus, setUserRating, getEntry, isInList,
+  }), [watchlist, allEntries, addToList, removeFromList, setStatus, setUserRating, getEntry, isInList]);
+
   return (
-    <WatchlistContext.Provider value={{ watchlist, allEntries, addToList, removeFromList, setStatus, setUserRating, getEntry, isInList }}>
+    <WatchlistContext.Provider value={value}>
       {children}
     </WatchlistContext.Provider>
   );

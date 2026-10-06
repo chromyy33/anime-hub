@@ -1,0 +1,110 @@
+/* GenrePage — extracted from inline styles. Dynamic states use
+   :disabled and .active so JSX stays free of style objects. */
+
+.wrap {
+  padding-bottom: 60px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 48px;
+  height: 48px;
+}
+
+.title {
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.error {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--danger);
+  font-size: 15px;
+}
+
+.skeletonCard {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.skeletonMedia {
+  padding-top: 145%;
+}
+
+.skeletonBody {
+  padding: 12px;
+}
+
+.skeletonBar {
+  height: 14px;
+  background: var(--border-strong);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeletonBarShort {
+  height: 12px;
+  background: var(--border-subtle);
+  border-radius: 4px;
+  width: 60%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.pageBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.pageBtn:disabled {
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+.pageNum {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.pageNum.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--text-on-primary);
+  font-weight: 700;
+}
+
+.ellipsis {
+  padding: 0 6px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
