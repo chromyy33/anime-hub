@@ -18,8 +18,7 @@ export default function Footer() {
             ANI<span className={styles.footerLogoAccent}>DOC</span>
           </Link>
           <p className={styles.footerDesc}>
-            A premium anime tracking experience built for the modern fan. 
-            Discover, track, and manage your watchlist with ease.
+            Discover anime, track what you watch, and never miss an episode.
           </p>
         </div>
 
@@ -29,6 +28,7 @@ export default function Footer() {
           <ul className={styles.footerLinksList}>
             <li><Link to="/" className={styles.footerLink}>Home</Link></li>
             <li><Link to="/watchlist" className={styles.footerLink}>Watchlist</Link></li>
+            <li><Link to="/about" className={styles.footerLink}>About</Link></li>
             <li><Link to="/search" className={styles.footerLink}>Browse Anime</Link></li>
             <li><Link to="/schedule" className={styles.footerLink}>Airing Schedule</Link></li>
           </ul>

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation 
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Search, Calendar, Moon, Sun, X,
-  Star, Clock, Menu, TrendingUp, Bookmark
+  Star, Clock, Menu, TrendingUp, Bookmark, Info
 } from 'lucide-react';
 // Route-split: each page loads on demand instead of bloating the initial bundle.
 const Home = lazy(() => import('./pages/Home'));
@@ -14,6 +14,7 @@ const SchedulePage = lazy(() => import('./pages/SchedulePage'));
 const CharacterDetails = lazy(() => import('./pages/CharacterDetails'));
 const DesignSystemPage = lazy(() => import('./design-system'));
 const WatchlistPage = lazy(() => import('./pages/WatchlistPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 import Footer from './components/Footer';
 import { fetchSuggestions, fetchAnimeOfDay } from './utils/anilist';
 import { useWatchlist } from './context/WatchlistContext';
@@ -62,7 +63,11 @@ const MobileMenu = memo(({ open, onClose, animeOfDay, isDark, setIsDark }) => {
               </Link>
               <Link to="/search" className={styles.mobileMenuItem} onClick={onClose}>
                 <Search size={18} color="var(--primary)" />
-                Browse All
+                Browse anime
+              </Link>
+              <Link to="/about" className={styles.mobileMenuItem} onClick={onClose}>
+                <Info size={18} color="var(--primary)" />
+                About AniDoc
               </Link>
             </div>
 
@@ -323,6 +328,7 @@ function App() {
             <Route path="/genre/:id/:name" element={<GenrePage />} />
             <Route path="/schedule"   element={<SchedulePage />} />
             <Route path="/watchlist"   element={<WatchlistPage />} />
+            <Route path="/about"       element={<AboutPage />} />
             <Route path="/character/:id" element={<CharacterDetails />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
           </Routes>

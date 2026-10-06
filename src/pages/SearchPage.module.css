@@ -298,7 +298,8 @@
   color: var(--text-accent);
 }
 
-/* ── Active filter chips ── */
+/* ── Active filter pills ──
+   Round selectable pills (not square badges), each dismissible on its own. */
 .activeChips {
   display: flex;
   flex-wrap: wrap;
@@ -306,10 +307,38 @@
   margin-bottom: 20px;
 }
 
-.activeChip {
+.activePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--primary-line);
   background: var(--primary-dim);
-  border-color: var(--text-accent);
   color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.activePillX {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.activePillX:hover {
+  background: var(--primary);
+  color: var(--text-on-primary);
 }
 
 /* ── Skeleton / states ── */

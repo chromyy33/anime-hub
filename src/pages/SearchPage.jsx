@@ -34,6 +34,12 @@ export const JIKAN_TO_ANILIST_GENRES = {
   '30': 'Sports', '37': 'Supernatural', '41': 'Thriller', '18': 'Mecha', '40': 'Psychological'
 };
 
+// URL genre values (Jikan ids or names) mapped to AniList display names.
+function parseGenres(raw) {
+  if (!raw) return [];
+  return raw.split(',').map(g => JIKAN_TO_ANILIST_GENRES[g] || g);
+}
+
 // ─── Animation variants ────────────────────────────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -51,6 +57,28 @@ function GenrePill({ genre, selected, onToggle }) {
       {selected && <Check size={11} strokeWidth={3} />}
       {genre.name}
     </button>
+  );
+}
+
+// ─── Human-readable labels for active-filter pills ─────────────────────
+const STATUS_LABELS = { airing: 'Airing', complete: 'Finished', upcoming: 'Upcoming' };
+const TYPE_LABELS = { tv: 'TV', movie: 'Movie', ova: 'OVA', ona: 'ONA', special: 'Special' };
+const SORT_LABELS = { score: 'Score', popularity: 'Popularity', members: 'Members', favorites: 'Favorites', start_date: 'Newest' };
+
+// ─── Removable active-filter pill ──────────────────────────────────────
+function ActivePill({ label, title, onRemove }) {
+  return (
+    <span className={styles.activePill} title={title}>
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        className={styles.activePillX}
+        aria-label={`Remove ${title || label} filter`}
+      >
+        <X size={12} strokeWidth={3} />
+      </button>
+    </span>
   );
 }
 
@@ -149,15 +177,23 @@ export default function SearchPage() {
   const effStatus = urlStatus || (urlFilter === 'airing' ? 'airing' : '');
 
   // ── Local filter state (drafts until Apply) ─────────────────────────
-  const [selectedGenres, setSelectedGenres] = useState(() => {
-    if (!urlGenres) return [];
-    return urlGenres.split(',').map(g => JIKAN_TO_ANILIST_GENRES[g] || g);
-  });
+  const [selectedGenres, setSelectedGenres] = useState(() => parseGenres(urlGenres));
   const [type,     setType]     = useState(urlType);
   const [status,   setStatus]   = useState(effStatus);
   const [sort,     setSort]     = useState(urlSort);
   const [minScore, setMinScore] = useState(urlMinScore);
   const [year,     setYear]     = useState(urlYear);
+
+  // Keep drafts in sync when the URL changes underneath (chip dismiss,
+  // clear-all) so reopening the panel never shows stale selections.
+  useEffect(() => {
+    setSelectedGenres(parseGenres(urlGenres));
+    setType(urlType);
+    setStatus(effStatus);
+    setSort(urlSort);
+    setMinScore(urlMinScore);
+    setYear(urlYear);
+  }, [urlGenres, urlType, effStatus, urlSort, urlMinScore, urlYear]);
 
   // ── Data state ──────────────────────────────────────────────────────
   const [results,    setResults]    = useState([]);
@@ -232,6 +268,23 @@ export default function SearchPage() {
     setSort('score'); setMinScore(0); setYear('');
     const p = {}; if (query) p.q = query; p.page = '1';
     setSearchParams(p);
+  };
+
+  // Remove a single active filter (per-pill ×). Genres drop one id at a
+  // time; status also clears a translated ?filter= landing so it can't creep
+  // back. Drafts re-sync from the URL via the effect above.
+  const removeFilter = (key, genreId) => {
+    const cur = Object.fromEntries(searchParams.entries());
+    if (key === 'genre' && genreId) {
+      const rest = (cur.genres || '').split(',').filter(g => g !== genreId);
+      if (rest.length) cur.genres = rest.join(',');
+      else delete cur.genres;
+    } else {
+      delete cur[key];
+      if (key === 'status') delete cur.filter;
+    }
+    cur.page = '1';
+    setSearchParams(cur);
   };
 
   const goToPage = (p) => {
@@ -373,18 +426,55 @@ export default function SearchPage() {
         )}
       </AnimatePresence>
 
-      {/* Active filter chips (below panel when closed) */}
+      {/* Active filter pills (below panel when closed) — dismiss one by one */}
       {!showFilters && activeCount > 0 && (
         <div className={styles.activeChips}>
-          {urlType && <span className={`badge ${styles.activeChip}`}>Type: {urlType.toUpperCase()}</span>}
-          {effStatus && <span className={`badge ${styles.activeChip}`}>Status: {effStatus}</span>}
-          {urlMinScore > 0 && <span className={`badge ${styles.activeChip}`}>Score ≥ {urlMinScore}</span>}
-          {urlYear && <span className={`badge ${styles.activeChip}`}>Year: {urlYear}</span>}
-          {urlSort !== 'score' && <span className={`badge ${styles.activeChip}`}>Sort: {urlSort}</span>}
+          {urlType && (
+            <ActivePill
+              label={`Type: ${TYPE_LABELS[urlType] || urlType}`}
+              title="Type filter"
+              onRemove={() => removeFilter('type')}
+            />
+          )}
+          {effStatus && (
+            <ActivePill
+              label={`Status: ${STATUS_LABELS[effStatus] || effStatus}`}
+              title="Status filter"
+              onRemove={() => removeFilter('status')}
+            />
+          )}
+          {urlMinScore > 0 && (
+            <ActivePill
+              label={`Score ≥ ${urlMinScore}`}
+              title="Minimum score filter"
+              onRemove={() => removeFilter('min_score')}
+            />
+          )}
+          {urlYear && (
+            <ActivePill
+              label={`Year: ${urlYear}`}
+              title="Year filter"
+              onRemove={() => removeFilter('start_date')}
+            />
+          )}
+          {urlSort !== 'score' && (
+            <ActivePill
+              label={`Sort: ${SORT_LABELS[urlSort] || urlSort}`}
+              title="Sort order"
+              onRemove={() => removeFilter('order_by')}
+            />
+          )}
           {urlGenres && urlGenres.split(',').map(gid => {
             const resolved = JIKAN_TO_ANILIST_GENRES[gid] || gid;
             const g = POPULAR_GENRES.find(x => x.id === resolved || x.name === resolved);
-            return g ? <span key={gid} className={`badge ${styles.activeChip}`}>{g.name}</span> : null;
+            return g ? (
+              <ActivePill
+                key={gid}
+                label={g.name}
+                title="Genre filter"
+                onRemove={() => removeFilter('genre', gid)}
+              />
+            ) : null;
           })}
         </div>
       )}
@@ -408,7 +498,7 @@ export default function SearchPage() {
       {isEmpty && (
         <div className={styles.emptyWrap}>
           <SearchX size={48} strokeWidth={1.5} />
-          <p className={styles.emptyIcon}>No results found{query ? ` for "${query}"` : ''}</p>
+          <p className={styles.emptyIcon}>No matches{query ? ` for "${query}"` : ''}</p>
           {activeCount > 0 && <button onClick={clearFilters} className={styles.emptyRetry}>Clear filters and try again</button>}
         </div>
       )}
@@ -424,7 +514,7 @@ export default function SearchPage() {
       {!loading && results.length === 0 && !hasSearch && (
         <div className={styles.browseHint}>
           <SearchX size={48} strokeWidth={1.5} />
-          <p className={styles.browseHintText}>Search above or open Filters to browse.</p>
+          <p className={styles.browseHintText}>Find your next favorite — search above or open filters to browse everything.</p>
         </div>
       )}
 

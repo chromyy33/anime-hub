@@ -37,7 +37,7 @@ export function WatchlistProvider({ children }) {
       try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
-    toast.success("Added to watchlist", {
+    toast.success("Saved to your watchlist", {
       icon: <CheckCircle2 size={18} color="var(--primary)" />
     });
   }, []);
@@ -49,7 +49,7 @@ export function WatchlistProvider({ children }) {
       try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
-    toast.info("Removed from list", {
+    toast.info("Removed from your watchlist", {
       icon: <Trash2 size={18} color="var(--primary)" />
     });
   }, []);
@@ -61,7 +61,7 @@ export function WatchlistProvider({ children }) {
       try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
-    toast.success("Status updated", {
+    toast.success("Watchlist updated", {
       icon: <LayoutGrid size={18} color="var(--primary)" />
     });
   }, []);

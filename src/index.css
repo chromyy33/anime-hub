@@ -586,6 +586,26 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
 }
 .details-left { flex: 0 0 300px; }
 
+/* Desktop: pin the poster/stats column while the content scrolls.
+   Self-scrolls internally if taller than the viewport. Mobile stacks,
+   so stickiness is disabled there (see ≤900px query). */
+@media (min-width: 901px) {
+  .details-left {
+    position: sticky;
+    top: 96px;
+    align-self: flex-start;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
+    /* Scrollable but chromeless — no visible scrollbar. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .details-left::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    UTILITY FLEXBOX / LAYOUT HELPERS
    ═══════════════════════════════════════════════════════════════════════ */

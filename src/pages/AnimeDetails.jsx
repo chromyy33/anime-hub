@@ -53,7 +53,7 @@ export default function AnimeDetails() {
         const result = await fetchAnimeDetails(id);
         if (cancelled) return;
         if (!result || !result.anime) {
-          setError("Anime not found.");
+          setError("We couldn't find that anime.");
           setLoading(false);
           return;
         }
@@ -66,7 +66,7 @@ export default function AnimeDetails() {
         setLoading(false);
       } catch (err) {
         if (!cancelled) {
-          setError("Failed to load anime metadata. Please try again.");
+          setError("Couldn't load this anime — check your connection and try again.");
           setLoading(false);
         }
       }

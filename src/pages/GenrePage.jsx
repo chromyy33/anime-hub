@@ -41,7 +41,7 @@ export default function GenrePage() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Failed to load results.');
+          setError("Couldn't load these titles — please try again.");
           setLoading(false);
         }
       });

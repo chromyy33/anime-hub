@@ -86,7 +86,7 @@ export default function CharacterDetails() {
   } : null, [data]);
 
   if (loading) return <CharacterSkeleton />;
-  if (!data) return <div className={`text-center ${styles.notFound}`}>Character not found.</div>;
+  if (!data) return <div className={`text-center ${styles.notFound}`}>We couldn't find that character.</div>;
 
   return (
     <div className={`page-container ${styles.wrap}`}>
@@ -156,7 +156,7 @@ export default function CharacterDetails() {
 
                 <h3 className="section-title">Biography</h3>
                 <p className={styles.bio}>
-                    {data.about || "No biography available."}
+                    {data.about || "No biography added for this character yet."}
                 </p>
 
                 {/* Animeography - Contained List */}

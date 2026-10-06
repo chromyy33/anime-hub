@@ -119,7 +119,7 @@ export default function SchedulePage() {
   const downloadICS = () => {
     const airingWatchlist = allEntries.filter(a => a.status === 'watching');
     if (airingWatchlist.length === 0) {
-        toast.info("Add airing anime to your Watching list first!");
+        toast.info("Nothing to export yet — save an airing show to Watching first.");
         return;
     }
     let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//AniDoc//Anime Schedule//EN\n";
@@ -150,7 +150,7 @@ export default function SchedulePage() {
               Airing Calendar
             </h1>
             <p className={styles.subtitle}>
-              The complete weekly release schedule converted to your <strong>local 24h time</strong>.
+              Every release, converted to your <strong>local 24h time</strong> — never miss an episode.
             </p>
           </div>
           <div className={styles.headerMeta}>
@@ -248,7 +248,7 @@ export default function SchedulePage() {
             ) : (
               <div className={styles.empty}>
                   <LayoutGrid size={40} className={styles.emptyIcon} />
-                  <p className={styles.emptyText}>No results found.</p>
+                  <p className={styles.emptyText}>Nothing airs matching that — try another title.</p>
               </div>
             )}
           </div>

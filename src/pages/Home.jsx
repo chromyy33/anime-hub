@@ -282,7 +282,7 @@ export default function Home() {
       <section>
         {data.airing.length === 0 && loading ? <SkeletonRow /> : data.airing.length > 0 && (
           <>
-            <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="The hottest shows currently on air" linkTo="/search?filter=airing" />
+            <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="What everyone is watching this week" linkTo="/search?filter=airing" />
             <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
@@ -292,7 +292,7 @@ export default function Home() {
       <section>
         {data.movies.length === 0 && loading ? <SkeletonRow /> : data.movies.length > 0 && (
           <>
-            <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" />
+            <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" linkTo="/search?type=movie" />
             <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
@@ -302,7 +302,7 @@ export default function Home() {
       <section>
         {data.action.length === 0 && loading ? <SkeletonRow /> : data.action.length > 0 && (
           <>
-            <SectionHeader Icon={Zap} title="Action & Adventure" subtitle="High-octane fights and epic journeys" />
+            <SectionHeader Icon={Zap} title="Action & Adventure" subtitle="High-octane fights and epic journeys" linkTo="/search?genres=Action" />
             <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
@@ -312,7 +312,7 @@ export default function Home() {
       <section>
         {data.romance.length === 0 && loading ? <SkeletonRow /> : data.romance.length > 0 && (
           <>
-            <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" />
+            <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" linkTo="/search?genres=Romance" />
             <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
@@ -322,7 +322,7 @@ export default function Home() {
       <section>
         {data.upcoming.length === 0 && loading ? <SkeletonRow /> : data.upcoming.length > 0 && (
           <>
-            <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" />
+            <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" linkTo="/search?status=upcoming&order_by=members" />
             <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
