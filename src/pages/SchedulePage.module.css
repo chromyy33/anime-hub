@@ -46,15 +46,15 @@
   color: var(--text-tertiary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .exportBtn {
-  padding: 8px 18px;
+  padding: 8px 20px;
   gap: 8px;
   font-size: 13px;
   border-radius: var(--radius-sm);
-  height: 38px;
+  height: 40px;
 }
 
 .guide {
@@ -69,8 +69,8 @@
 }
 
 .guideStep {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--primary);
   color: var(--text-on-primary);
@@ -122,7 +122,7 @@
 }
 
 .searchCol {
-  flex: 0 0 370px;
+  flex: 0 0 372px;
   max-width: 100%;
   position: relative;
   display: flex;
@@ -131,7 +131,7 @@
 
 .searchIcon {
   position: absolute;
-  left: 14px;
+  left: 16px;
   pointer-events: none;
 }
 

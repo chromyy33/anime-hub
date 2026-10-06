@@ -1,0 +1,312 @@
+/* WatchlistPage — saved-items list. Rows reuse global card/chip classes. */
+
+.wrap {
+  padding-bottom: 60px;
+}
+
+.count {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 16px;
+  align-items: center;
+}
+
+.thumbLink {
+  flex-shrink: 0;
+  width: 56px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-base);
+  display: block;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title:hover {
+  color: var(--text-accent);
+}
+
+/* Status sits above the title — hierarchy first, details after. */
+.statusLine {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.title:hover {
+  color: var(--text-accent);
+}
+
+.titleScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+/* Rating lives below the title: compact slider, wraps to its own
+   line on narrow screens so it can never be squeezed away. */
+.rateInline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+/* Beats global input[type="range"]{width:100%} on specificity (0,2,0). */
+.rateInline .rateSlider {
+  width: 152px;
+  max-width: 152px;
+  flex-shrink: 0;
+}
+
+.rateVal {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.rateVal.rated {
+  color: var(--text-accent);
+}
+
+/* Small edit affordance next to a collapsed rating. */
+.rateEdit {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.rateEdit:hover {
+  color: var(--text-accent);
+  border-color: var(--primary);
+  background: var(--primary-dim);
+}
+
+/* Dots drawer + one-click delete, paired bottom-right. Icon-sized, so no
+   mobile variant swap is needed. */
+.actionPair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 2px 0;
+}
+
+/* Dots menu + one-click delete, paired bottom-right. Compact enough
+   for mobile — no variant swapping needed. */
+.actionPair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Destructive icon button pinned to the row's top-right. */
+.deleteBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.deleteBtn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-dim);
+}
+
+.hiddenNote {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0 0 4px;
+}
+
+.thumbEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+/* Delete confirm dialog. */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: modalIn 0.18s ease-out;
+}
+
+.modalCard {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-solid);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 24px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.modalText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-tertiary);
+  gap: 8px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 16px 0 0;
+}
+
+.emptyText {
+  font-size: 14px;
+  margin: 0 0 16px;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+.emptyCta {
+  text-decoration: none;
+}

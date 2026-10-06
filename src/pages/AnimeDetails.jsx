@@ -511,10 +511,12 @@ export default function AnimeDetails() {
           <Carousel 
             title="Main Characters & Voice Actors"
             items={characters}
+            variant="chars"
+            navInHeader
             renderItem={(char) => {
                 const voiceActor = char.voice_actors?.find(va => va.language === 'Japanese');
                 return (
-                <Link to={`/character/${char.character.mal_id}`} key={char.character.mal_id} className={`card-interactive scroll-item ${styles.charCard}`}>
+                <Link to={`/character/${char.character.mal_id}`} key={char.character.mal_id} className={`card-interactive ${styles.charCard}`}>
                     {/* Character portrait */}
                     <img src={char.character.images.jpg.image_url} alt={char.character.name} className={styles.charImg} />
                     {/* Character info */}
@@ -545,8 +547,7 @@ export default function AnimeDetails() {
                   key={rec.entry.mal_id} 
                   anime={rec.entry} 
                   index={i}
-                  className="carousel-item"
-                />
+                                  />
             )}
           />
 

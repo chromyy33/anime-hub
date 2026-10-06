@@ -210,7 +210,7 @@ export default function SearchPage() {
       });
 
     return () => { cancelled = true; };
-  }, [query, urlGenres, urlType, urlStatus, urlFilter, urlSort, urlMinScore, urlYear, page]);
+  }, [query, urlGenres, urlType, urlStatus, urlFilter, effStatus, urlSort, urlMinScore, urlYear, page]);
 
   // ── Apply filters → update URL (resets to page 1) ───────────────────
   const applyFilters = () => {

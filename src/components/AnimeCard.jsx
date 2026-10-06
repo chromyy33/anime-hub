@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Clock } from 'lucide-react';
+import { Star, Clock, EyeOff } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { useWatchlist } from '../context/WatchlistContext';
 import WatchlistButton from './WatchlistButton';
 import styles from './AnimeCard.module.css';
@@ -12,15 +13,37 @@ const fadeUp = {
 
 export default function AnimeCard({ anime, index, variant = 'grid', style = {}, className = '' }) {
   const navigate = useNavigate();
-  const { addToList, removeFromList, getEntry } = useWatchlist();
-  const entry = getEntry(anime?.mal_id);
-  const inList = !!entry;
+  const { isHidden, hideAnime, unhideAnime } = useWatchlist();
 
   const handleGenreClick = (e, g) => {
     e.preventDefault();
     e.stopPropagation();
     navigate(`/genre/${g.mal_id}/${g.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
+
+  const handleNotInterested = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!anime?.mal_id) return;
+    const title = anime.title_english || anime.title;
+    hideAnime(anime.mal_id, { title, image: anime.images?.jpg?.image_url });
+    // YouTube-style recovery: immediate Undo, then the Hidden list owns it.
+    const id = toast.info(
+      <div className={styles.undoToast}>
+        <span>Hidden from recommendations</span>
+        <button
+          className={styles.undoBtn}
+          onClick={() => { unhideAnime(anime.mal_id); toast.dismiss(id); }}
+        >
+          Undo
+        </button>
+      </div>,
+      { autoClose: 6000, closeOnClick: false }
+    );
+  };
+
+  // Dismissed via "Not interested" — leave no gap.
+  if (variant === 'grid' && anime?.mal_id && isHidden(anime.mal_id)) return null;
 
   // Grid Variant (Used in Search/Home)
   if (variant === 'grid') {
@@ -44,6 +67,19 @@ export default function AnimeCard({ anime, index, variant = 'grid', style = {}, 
               <span className={styles.typeBadge}>
                 {anime.type}
               </span>
+            )}
+            <button
+              onClick={handleNotInterested}
+              title="Not interested"
+              aria-label={`Not interested in ${anime.title_english || anime.title}`}
+              className={styles.notInterestedBtn}
+            >
+              <EyeOff size={13} />
+            </button>
+            {anime.synopsis && (
+              <div className={styles.cardSynopsis}>
+                <p className={styles.cardSynopsisText}>{anime.synopsis}</p>
+              </div>
             )}
           </div>
           <div className={styles.gridInfo}>

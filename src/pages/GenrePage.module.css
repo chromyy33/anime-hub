@@ -42,7 +42,7 @@
 }
 
 .skeletonBar {
-  height: 14px;
+  height: 16px;
   background: var(--border-strong);
   border-radius: 4px;
   margin-bottom: 8px;
@@ -66,9 +66,9 @@
 .pageBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--bg-surface);
@@ -104,7 +104,7 @@
 }
 
 .ellipsis {
-  padding: 0 6px;
+  padding: 0 8px;
   color: var(--text-tertiary);
   font-size: 14px;
 }

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation 
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Search, Calendar, Moon, Sun, X,
-  Star, Clock, Menu, TrendingUp
+  Star, Clock, Menu, TrendingUp, Bookmark
 } from 'lucide-react';
 // Route-split: each page loads on demand instead of bloating the initial bundle.
 const Home = lazy(() => import('./pages/Home'));
@@ -13,8 +13,10 @@ const GenrePage = lazy(() => import('./pages/GenrePage'));
 const SchedulePage = lazy(() => import('./pages/SchedulePage'));
 const CharacterDetails = lazy(() => import('./pages/CharacterDetails'));
 const DesignSystemPage = lazy(() => import('./design-system'));
+const WatchlistPage = lazy(() => import('./pages/WatchlistPage'));
 import Footer from './components/Footer';
 import { fetchSuggestions, fetchAnimeOfDay } from './utils/anilist';
+import { useWatchlist } from './context/WatchlistContext';
 import styles from './components/Navbar.module.css';
 
 import { ToastContainer } from 'react-toastify';
@@ -49,6 +51,10 @@ const MobileMenu = memo(({ open, onClose, animeOfDay, isDark, setIsDark }) => {
               <Link to="/schedule" className={styles.mobileMenuItem} onClick={onClose}>
                 <Calendar size={18} color="var(--primary)" />
                 Schedule
+              </Link>
+              <Link to="/watchlist" className={styles.mobileMenuItem} onClick={onClose}>
+                <Bookmark size={18} color="var(--primary)" />
+                Watchlist
               </Link>
               <Link to="/" className={styles.mobileMenuItem} onClick={onClose}>
                 <TrendingUp size={18} color="var(--primary)" />
@@ -120,6 +126,7 @@ function Navbar({ isDark, setIsDark, setMobileOpen, mobileOpen }) {
   const [loadingSug,  setLoadingSug]  = useState(false);
   const debounceRef = useRef(null);
   const wrapRef     = useRef(null);
+  const { allEntries } = useWatchlist();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -218,6 +225,12 @@ function Navbar({ isDark, setIsDark, setMobileOpen, mobileOpen }) {
 
       {/* Desktop Navigation */}
       <div className={`${styles.desktopOnly} ${styles.desktopNavGroup}`}>
+        <Link to="/watchlist" className={`icon-btn ${styles.navIconBtn}`} title="Your Watchlist">
+          <Bookmark size={20} />
+          {allEntries.length > 0 && (
+            <span className={styles.navBadge}>{allEntries.length > 99 ? '99+' : allEntries.length}</span>
+          )}
+        </Link>
         <Link to="/schedule" className="icon-btn" title="Airing Schedule">
           <Calendar size={20} />
         </Link>
@@ -309,6 +322,7 @@ function App() {
             <Route path="/search"     element={<SearchPage />} />
             <Route path="/genre/:id/:name" element={<GenrePage />} />
             <Route path="/schedule"   element={<SchedulePage />} />
+            <Route path="/watchlist"   element={<WatchlistPage />} />
             <Route path="/character/:id" element={<CharacterDetails />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
           </Routes>

@@ -7,58 +7,87 @@
   margin-bottom: 20px;
 }
 
+/* Header-anchored navigation for short rails (character rows): a compact
+   chevron pair beside the title instead of floating circles over faces.
+   Ghost treatment — green stays reserved for primary actions. */
+.headRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.headTitle {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.headArrows {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.headArrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  padding: 0;
+}
+
+.headArrow:hover:not(:disabled) {
+  color: var(--text-accent);
+  border-color: var(--primary);
+  background: var(--primary-dim);
+}
+
+.headArrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .sliderWrapper {
   position: relative;
 }
 
-.horizontalScroll {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  overflow-y: visible;
-  /* Breathing room for the hover lift (-6px) and emerald ring on edge items.
-     Negative side margins keep edge alignment with section titles.
-     Watchlist menus portal to document.body, so no dropdown room is needed —
-     and with no dead overlap zone, nothing below can be click-blocked. */
-  padding: 8px 8px 12px;
-  margin: 0 -8px;
-  /* No native snap for mouse: release settling is done in JS (settle()),
-     gliding to the nearest full page. Touch devices get gentle native
-     snap instead (see hover:none below) so momentum never fights JS. */
-  scroll-snap-type: none;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scroll-padding: 0 var(--spacing-lg);
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  cursor: grab;
+/* Breathing room for the hover lift + emerald ring on edge slides.
+   Negative margins keep the track aligned with section titles.
+   Room lives INSIDE each slide (not around the swiper box), so the
+   ring is never clipped by Swiper's overflow, at any scroll position. */
+.viewportPad {
+  padding: 8px;
+  margin: -8px;
 }
 
-.horizontalScroll.dragging {
-  cursor: grabbing;
-  scroll-behavior: auto;
+.viewportPad :global(.swiper) {
+  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 
-@media (hover: none) {
-  /* Touch: let the browser settle momentum natively; JS stays out of the way. */
-  .horizontalScroll {
-    scroll-snap-type: x proximity;
-  }
-}
-
-.horizontalScroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-@media (max-width: 768px) {
-  .horizontalScroll {
-    scroll-padding: 0 var(--spacing-md);
-  }
+/* Swiper's own slide element — content fills it edge to edge. */
+.viewportPad :global(.swiper-slide) {
+  height: auto;
+  padding: 8px 4px;
 }
 
 .sliderBtn {
   position: absolute;
-  top: 150px;
+  /* Vertically centered on the track: the only position that stays
+     correct at every slide width (poster heights scale with width). */
+  top: 50%;
   transform: translateY(-50%);
   z-index: 200;
   background: var(--bg-elevated);
@@ -71,7 +100,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(12px);
 }
@@ -83,23 +112,20 @@
   transform: translateY(-50%) scale(1.1);
 }
 
+/* Inset (never outset): outset arrows clip at viewport/column edges on
+   narrow screens and detail columns. Floating glass over the edge cards
+   is the standard pattern (Netflix/Hotstar). */
 .sliderBtn.left {
-  left: -22px;
+  left: 8px;
 }
 
 .sliderBtn.right {
-  right: -22px;
+  right: 8px;
 }
 
 @media (max-width: 1100px) {
-  .sliderBtn.left {
-    left: -10px;
-  }
-  .sliderBtn.right {
-    right: -10px;
-  }
   .sliderBtn {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
   }
 }

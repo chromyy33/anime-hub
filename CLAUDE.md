@@ -27,17 +27,17 @@ Recorded from source (`src/index.css`, `*.module.css`, pages). Not chosen — th
 - Recurring: `.page-title` 32/800/-0.02em; `.section-title` 20/700 + 40px `.section-icon` tile; `.card-label` 11/700/uppercase/0.07em.
 
 ### Spacing / radii / shadows
-- Spacing rhythm: 4 · 8 · 16 · 24 · 40 · 64 (`--spacing-*`). Shell `1920px`, page/schedule/footer `1400px` unified track; navbar content rides it via `max(gutter, (100vw − 1400px)/2)` mirroring `.app-container` gutters (40/24/16).
+- Spacing rhythm: 4 · 8 · 16 · 24 · 40 · 64 (`--spacing-*`). 4pt grid — every layout value (padding, margin, gap, offsets, boxes) must be divisible by 4; hairlines ≤2px, fonts, borders, radii and motion are exempt. Shell `1920px`, page/schedule/footer `1400px` unified track; navbar content rides it via `max(gutter, (100vw − 1400px)/2)` mirroring `.app-container` gutters (40/24/16).
 - Radii: sm 6, md 10, lg 16, xl 24. Only pills are 99px.
 - Shadows neutral only (`--shadow-sm/md/lg/xl`). Glass recipe: surface + `inset 0 0 0 1px var(--glass-border)` + blur 48px (12px navbar/slider, 32px dropdown).
-- Interactive cards: lift `-6px` + `0 0 0 2px var(--primary)` ring + emerald glow on hover; poster zoom `1.06`; image wrapper ratio `140%`.
+- Interactive cards: lift `-3px` + `0 0 0 2px var(--primary)` ring on hover (no colored glow, no image zoom); grid posters reveal a synopsis overlay (white-on-scrim, 5-line clamp); image wrapper ratio `140%`.
 
 ### Components → canonical class / DS export
 - Buttons: `.btn-primary` → `DSButton`, `.btn-ghost` → `DSButton variant="ghost"`, `.icon-btn` → `DSIconButton`. Watchlist split/icon/badge lives in `WatchlistButton.jsx` — don't rebuild. Its menu portals to `document.body` (`.wl-portal`, viewport-pinned) so it can never hide behind cards; carousels therefore carry no dropdown room.
 - Search: `.search-input` (42px, icon-left, clear-X right, emerald focus ring) → `DSSearchBar`. Navbar adds square submit button.
 - Tags: `.badge` neutral → `DSBadge`; `.chip-genre` emerald → `DSGenreChip`; `.chip-filter` (+`.active`) day/tab → `DSFilterChip`; `.genre-pill` (+`.selected`) round multi-select → `DSPill`.
 - Text rules: emerald text → `var(--text-accent)` (never `var(--primary)`); micro-labels ≤12px may use `--primary-ink`. Text utilities `.text-accent/.text-primary/.text-muted/.no-underline` now exist — the pages already use them.
-- Cards/layout: `.card` → `DSCard`; `.card-interactive` → `DSCardInteractive`; `.info-row`, `.card-label`, `.page-header`, `.section-title`; score/type overlays → `DSScoreBadge` / `DSTypeBadge` (always white-on-dark glass).
+- Cards/layout: `.card` → `DSCard`; `.card-interactive` → `DSCardInteractive`; `.info-row`, `.card-label`, `.page-header`, `.section-title`; score/type overlays → `DSScoreBadge` / `DSTypeBadge` (always white-on-dark glass). Carousels are Swiper (`components/Carousel.jsx`): integer slides-per-view per breakpoint (never cut cards), arrows page by `slidesPerGroup`, custom buttons auto-disabled at bounds; the old hand-rolled scroller is gone.
 - Forms/feedback: custom glass dropdowns (never native select styling), 16px emerald range thumbs, `.skeleton` shimmer + `.spinner`, glass toasts with emerald progress bar.
 
 ### Conspicuously absent

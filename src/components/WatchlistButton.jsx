@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { BookmarkPlus, Check, Eye, Clock, ChevronDown, Trash2, MoreHorizontal } from 'lucide-react';
@@ -22,7 +22,8 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   const isDots = variant === 'dots';
 
   const [open,      setOpen]      = useState(false);
-  const [menuPos,   setMenuPos]   = useState(null); // { top, left } — viewport-pinned
+  const [menuPos,   setMenuPos]   = useState(null); // { top?, bottom?, left } — viewport-pinned
+  const [flipped,   setFlipped]   = useState(false); // menu opens upward
   const [sliderVal, setSliderVal] = useState(entry?.userRating ?? 0);
   const ref = useRef(null);      // trigger wrapper
   const menuRef = useRef(null);  // portaled menu
@@ -44,8 +45,6 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     };
   }, []);
 
-  if (!anime) return null;
-
   // ── Compute status classes ──
   const statusClass = !inList
     ? styles.statusDefault
@@ -58,19 +57,31 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
   const cfg = entry ? STATUS_CONFIG[entry.status] : null;
   const StatusIcon = (isIcon && inList) || isDots ? MoreHorizontal : (cfg?.Icon ?? BookmarkPlus);
 
-  // Menu placement: portaled to document.body and pinned to the trigger's
-  // bottom-left edge (original anchoring) — never trapped behind cards.
-  const MENU_GAP = 8;
+  // Menu placement: portaled to document.body (never trapped behind cards),
+  // anchored to the trigger's bottom-left — then nudged to stay on screen:
+  // shifts left when the right edge would overflow, flips upward when there
+  // is no room below (and room above).
+  const MENU_W = 210, MENU_GAP = 8, MENU_EST_H = 320, EDGE = 8;
 
-  const computePos = useCallback(() => {
+  const computePos = useCallback((flip) => {
     const el = ref.current;
     if (!el) return null;
     const r = el.getBoundingClientRect();
-    return { left: r.left, top: r.bottom + MENU_GAP };
+    const left = Math.min(
+      Math.max(EDGE, (r.left + MENU_W + MENU_GAP > window.innerWidth) ? r.right - MENU_W : r.left),
+      window.innerWidth - MENU_W - EDGE
+    );
+    if (flip) return { left, bottom: window.innerHeight - r.top + MENU_GAP };
+    return { left, top: r.bottom + MENU_GAP };
   }, []);
 
   const openMenu = useCallback(() => {
-    setMenuPos(computePos());
+    const r = ref.current?.getBoundingClientRect();
+    const flip = r
+      ? (r.bottom + MENU_GAP + MENU_EST_H > window.innerHeight && r.top - MENU_GAP - MENU_EST_H > 0)
+      : false;
+    setFlipped(flip);
+    setMenuPos(computePos(flip));
     setOpen(true);
   }, [computePos]);
 
@@ -83,7 +94,7 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     let raf = 0;
     const follow = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setMenuPos(computePos()));
+      raf = requestAnimationFrame(() => setMenuPos(computePos(flipped)));
     };
     window.addEventListener('scroll', follow, true);
     window.addEventListener('resize', follow);
@@ -92,7 +103,18 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
       window.removeEventListener('scroll', follow, true);
       window.removeEventListener('resize', follow);
     };
-  }, [open, computePos]);
+  }, [open, flipped, computePos]);
+
+  // Correct the flip estimate once the real menu height is measurable.
+  useLayoutEffect(() => {
+    if (!open || flipped || !menuRef.current) return;
+    const m = menuRef.current.getBoundingClientRect();
+    const t = ref.current?.getBoundingClientRect().top ?? 0;
+    if (m.bottom > window.innerHeight - EDGE && t > m.height + EDGE) {
+      setFlipped(true);
+      setMenuPos(computePos(true));
+    }
+  }, [open, flipped, computePos]);
 
   const handleDirectClick = (e) => {
     e.preventDefault();
@@ -115,6 +137,8 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
     inList ? setStatus(anime.mal_id, key) : addToList(anime, key);
     setOpen(false);
   };
+
+  if (!anime) return null;
 
   return (
     <div ref={ref} className={`${styles.container} ${isBadge ? styles.isBadge : ''}`}>
@@ -164,11 +188,14 @@ export default function WatchlistButton({ anime, variant = 'default' }) {
           <motion.div
             ref={menuRef}
             key="wl-menu"
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            initial={{ opacity: 0, y: flipped ? 8 : -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             className="wl-portal"
-            style={{ left: menuPos.left, top: menuPos.top }}
+            style={{
+              left: menuPos.left,
+              ...(menuPos.bottom != null ? { bottom: menuPos.bottom } : { top: menuPos.top }),
+            }}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();

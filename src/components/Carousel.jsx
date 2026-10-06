@@ -1,143 +1,140 @@
-import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useWatchlist } from '../context/WatchlistContext';
+import 'swiper/css';
 import styles from './Carousel.module.css';
 
-export default function Carousel({ title, items, renderItem }) {
-  const scrollRef = useRef(null);
-  const [showLeft,  setShowLeft]  = useState(false);
-  const [showRight, setShowRight] = useState(false);
+// Whole-card paging: integer slides per view chosen from the container
+// width, so a card is never cut in half. Arrows advance exactly one page
+// (slidesPerGroup mirrors slidesPerView at every breakpoint).
+//
+// NOTE: arrows are driven imperatively (slidePrev/slideNext) with our own
+// edge state — never via Swiper's Navigation module + element refs, whose
+// mount-timing binding proved unreliable.
+// Whole-card paging: integer slides per view, so a card is never cut.
+// Counts key off the CONTAINER (breakpointsBase), not the window — a rail
+// in the narrow details column adapts to its own width: room for 3 shows
+// 3, room for 4 shows 4, never fewer pixels per card than the home design.
+const PAGE_SETS = {
+  // 200px poster cards (pitch ~216px with the gap).
+  standard: { 0: 2, 560: 3, 820: 4, 1080: 5, 1360: 6 },
+  // Character rows: fill the slide, ~340px at 3-up (design width).
+  chars: { 0: 1, 620: 2, 980: 3 },
+};
 
-  const measure = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    const hasOverflow = scrollWidth > clientWidth + 12;
-    setShowLeft(hasOverflow && scrollLeft > 12);
-    setShowRight(hasOverflow && scrollLeft < scrollWidth - clientWidth - 12);
+const keyOf = (item, i) =>
+  item?.mal_id ?? item?.character?.mal_id ?? item?.entry?.mal_id ?? i;
+
+export default function Carousel({ title, items, renderItem, variant = 'standard', navInHeader = false }) {
+  const swiperRef = useRef(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  const { hiddenIds } = useWatchlist();
+
+  // Dismissed ("Not interested") anime never reach the track — filtering here
+  // (not inside the card) so no blank slides are left behind. Character rows
+  // carry no top-level anime id and are always kept.
+  const visibleItems = (items || []).filter(item => {
+    const id = item?.mal_id ?? item?.entry?.mal_id;
+    return id == null || !hiddenIds.some(h => h.mal_id === id);
+  });
+
+  // Show arrows only when there is somewhere to go.
+  const syncEdges = useCallback((swiper) => {
+    const locked = swiper.isLocked;
+    setCanPrev(!locked && !swiper.isBeginning);
+    setCanNext(!locked && !swiper.isEnd);
   }, []);
 
-  useLayoutEffect(() => {
-    measure();
-    const t = setTimeout(measure, 120);
-    return () => clearTimeout(t);
-  }, [items, measure]);
+  if (!visibleItems.length) return null;
 
-  useEffect(() => {
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [measure]);
+  const counts = PAGE_SETS[variant] || PAGE_SETS.standard;
+  const firstCount = counts[0];
+  const breakpoints = Object.fromEntries(
+    Object.entries(counts).map(([w, n]) => [w, { slidesPerView: n, slidesPerGroup: n }])
+  );
 
-  const [isDragging, setIsDragging] = useState(false);
-  // Ref (not state): mousemove fires faster than re-renders.
-  const drag = useRef({ active: false, startX: 0, startLeft: 0, moved: false });
-  // Touch devices fire synthetic mouse events after a touch scroll — those
-  // must never start the mouse-drag path (they'd yank the track on release).
-  const lastTouchEnd = useRef(0);
-
-  // Glide to the nearest full page after a drag release. A short drag past
-  // ~1.5 tiles advances a whole page; a shorter one settles back — Hotstar feel.
-  // Anchored to the drag-start page so pages never drift out of alignment.
-  const settle = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el || el.clientWidth <= 0) return;
-    const pageW = el.clientWidth;
-    const startPage = Math.round(drag.current.startLeft / pageW);
-    const delta = el.scrollLeft - drag.current.startLeft;
-    const step = Math.abs(delta) > Math.min(300, pageW * 0.25) ? Math.sign(delta) : 0;
-    const maxPage = Math.max(0, Math.ceil((el.scrollWidth - el.clientWidth) / pageW));
-    const target = Math.min(Math.max(startPage + step, 0), maxPage);
-    el.scrollTo({ left: target * pageW, behavior: 'smooth' });
-  }, []);
-
-  const endDrag = useCallback((shouldSettle) => {
-    if (!drag.current.active) return;
-    drag.current.active = false;
-    setIsDragging(false);
-    if (shouldSettle) settle();
-  }, [settle]);
-
-  // A press released outside the track still settles (only if it started here).
-  useEffect(() => {
-    const onUp = () => endDrag(true);
-    window.addEventListener('mouseup', onUp);
-    return () => window.removeEventListener('mouseup', onUp);
-  }, [endDrag]);
-
-  const onMouseDown = (e) => {
-    const el = scrollRef.current;
-    if (!el || e.button !== 0) return;
-    if (Date.now() - lastTouchEnd.current < 600) return; // post-touch ghost event
-    e.preventDefault(); // kills text selection + image ghost-drag; clicks still fire
-    drag.current = { active: true, startX: e.pageX, startLeft: el.scrollLeft, moved: false };
-    setIsDragging(true);
+  const go = (dir) => {
+    const swiper = swiperRef.current;
+    if (!swiper || swiper.destroyed) return;
+    if (dir === 'left') swiper.slidePrev();
+    else swiper.slideNext();
   };
-
-  const onMouseLeave = () => {
-    // Gesture abandoned mid-press: stop tracking, don't settle.
-    drag.current.active = false;
-    setIsDragging(false);
-  };
-
-  const onMouseMove = (e) => {
-    const d = drag.current;
-    const el = scrollRef.current;
-    if (!d.active || !el) return;
-    const dx = e.pageX - d.startX;
-    if (Math.abs(dx) > 6) d.moved = true;
-    el.scrollLeft = d.startLeft - dx;
-  };
-
-  // A real drag must not activate cards/links on release.
-  const onClickCapture = (e) => {
-    if (drag.current.moved) {
-      e.preventDefault();
-      e.stopPropagation();
-      drag.current.moved = false;
-    }
-  };
-
-  // Hotstar-style paging: one full viewport of items per click,
-  // anchored so repeated clicks never drift out of alignment.
-  const scroll = (dir) => {
-    const el = scrollRef.current;
-    if (!el || el.clientWidth <= 0) return;
-    const page = Math.round(el.scrollLeft / el.clientWidth) + (dir === 'left' ? -1 : 1);
-    const maxPage = Math.max(0, Math.ceil((el.scrollWidth - el.clientWidth) / el.clientWidth));
-    el.scrollTo({ left: Math.min(Math.max(page, 0), maxPage) * el.clientWidth, behavior: 'smooth' });
-  };
-
-  if (!items || items.length === 0) return null;
 
   return (
     <div className={styles.carouselContainer}>
-      {title && (
+      {title && !navInHeader && (
         <h3 className={`${styles.title} section-title`}>
           {title}
         </h3>
       )}
+      {title && navInHeader && (
+        <div className={styles.headRow}>
+          <h3 className={styles.headTitle}>{title}</h3>
+          <div className={styles.headArrows}>
+            <button
+              onClick={() => go('left')}
+              aria-label="Scroll left"
+              className={styles.headArrow}
+              disabled={!canPrev}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={() => go('right')}
+              aria-label="Scroll right"
+              className={styles.headArrow}
+              disabled={!canNext}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.sliderWrapper}>
-        {showLeft && (
-          <button onClick={() => scroll('left')} className={`${styles.sliderBtn} ${styles.left}`}>
+        {!navInHeader && canPrev && (
+          <button onClick={() => go('left')} aria-label="Scroll left" className={`${styles.sliderBtn} ${styles.left}`}>
             <ChevronLeft size={22} />
           </button>
         )}
 
-        <div
-          ref={scrollRef}
-          onScroll={measure}
-          onMouseDown={onMouseDown}
-          onMouseLeave={onMouseLeave}
-          onMouseUp={() => endDrag(true)}
-          onMouseMove={onMouseMove}
-          onClickCapture={onClickCapture}
-          className={`${styles.horizontalScroll} ${isDragging ? styles.dragging : ''}`}
-        >
-          {items.map(renderItem)}
+        <div className={styles.viewportPad}>
+          <Swiper
+            slidesPerView={firstCount}
+            slidesPerGroup={firstCount}
+            breakpointsBase="container"
+            breakpoints={breakpoints}
+            spaceBetween={8}
+            speed={450}
+            grabCursor
+            preventClicks
+            preventClicksPropagation
+            watchOverflow
+            observer
+            observeParents
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+              syncEdges(swiper);
+            }}
+            onSlideChange={syncEdges}
+            onReachBeginning={syncEdges}
+            onReachEnd={syncEdges}
+            onLock={syncEdges}
+            onUnlock={syncEdges}
+            onUpdate={syncEdges}
+          >
+            {visibleItems.map((item, i) => (
+              <SwiperSlide key={keyOf(item, i)}>
+                {renderItem(item, i)}
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
-        {showRight && (
-          <button onClick={() => scroll('right')} className={`${styles.sliderBtn} ${styles.right}`}>
+        {!navInHeader && canNext && (
+          <button onClick={() => go('right')} aria-label="Scroll right" className={`${styles.sliderBtn} ${styles.right}`}>
             <ChevronRight size={22} />
           </button>
         )}
@@ -145,4 +142,3 @@ export default function Carousel({ title, items, renderItem }) {
     </div>
   );
 }
-

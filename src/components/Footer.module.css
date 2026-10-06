@@ -58,7 +58,7 @@
 .footerLogo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-family: 'Outfit', sans-serif;
   font-weight: 800;
   font-size: 20px;

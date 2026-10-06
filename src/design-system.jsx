@@ -110,7 +110,7 @@ export const tokens = {
     '2xl': 'var(--text-2xl)', // 32px (28 mobile)
     '3xl': 'var(--text-3xl)', // 44px (36 mobile)
   },
-  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 40, '2xl': 64 },
+  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 40, '2xl': 64 }, // 4pt grid — layout values stay divisible by 4
   radius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)' },
   blur: 'var(--glass-blur)', // 48px surfaces · 12px navbar/slider · 32px dropdown
   maxWidth: 'var(--max-app-width)', // 1920px shell · 1400px page-container · 1300px schedule
@@ -456,7 +456,7 @@ export default function DesignSystemPage() {
         </Section>
 
         {/* 07 CARDS */}
-        <Section index="07" title="Cards & layout" cue=".card = static glass panel (sidebar, filters, reviews). .card-interactive = hover lift -6px + 2px emerald ring. Card image wrapper is always 140% ratio with zoom 1.06 on hover. Grids use .grid-list; carousels hide scrollbars and snap.">
+        <Section index="07" title="Cards & layout" cue=".card = static glass panel (sidebar, filters, reviews). .card-interactive = hover lift -3px + 2px emerald ring (no glow, no zoom). Grid posters reveal a synopsis overlay on hover instead of scaling. Grids use .grid-list; carousels are Swiper with whole-card paging.">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <DSCard>
               <DSCardLabel>Stats</DSCardLabel>

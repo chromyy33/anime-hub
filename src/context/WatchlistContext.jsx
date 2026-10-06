@@ -3,14 +3,24 @@ import { toast } from 'react-toastify';
 import { CheckCircle2, Trash2, LayoutGrid } from 'lucide-react';
 
 const LS_KEY = 'animehub_watchlist';
+const HIDDEN_KEY = 'animehub_hidden';
 const WatchlistContext = createContext(null);
 
 function loadWatchlist() {
   try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; }
 }
 
+function loadHidden() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HIDDEN_KEY)) || [];
+    // Migrate legacy number-arrays to entry objects.
+    return raw.map(h => typeof h === 'number' ? { mal_id: h } : h);
+  } catch { return []; }
+}
+
 export function WatchlistProvider({ children }) {
   const [watchlist, setWatchlist] = useState(loadWatchlist);
+  const [hiddenIds, setHiddenIds] = useState(loadHidden);
 
   const addToList = useCallback((anime, status = 'plan') => {
     const entry = {
@@ -77,12 +87,35 @@ export function WatchlistProvider({ children }) {
   const isInList = useCallback((malId) => !!watchlist[malId], [watchlist]);
   const allEntries = useMemo(() => Object.values(watchlist), [watchlist]);
 
+  // "Not interested" dismissals — hidden from discovery surfaces, persisted.
+  // Stored as entry objects so the Hidden list can show titles/posters.
+  // YouTube buries recovery in My Activity; we surface it: an Undo toast
+  // on dismiss plus a visible Hidden list on the watchlist page.
+  const isHidden = useCallback((malId) => hiddenIds.some(h => h.mal_id === malId), [hiddenIds]);
+  const hideAnime = useCallback((malId, meta = {}) => {
+    setHiddenIds(prev => {
+      if (prev.some(h => h.mal_id === malId)) return prev;
+      const next = [...prev, { mal_id: malId, title: meta.title, image: meta.image }];
+      try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+  const unhideAnime = useCallback((malId) => {
+    setHiddenIds(prev => {
+      if (!prev.some(h => h.mal_id === malId)) return prev;
+      const next = prev.filter(h => h.mal_id !== malId);
+      try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
   // Memoized: unrelated parent renders (theme toggle, menu) must not
   // cascade into every card on the page through a fresh object identity.
   const value = useMemo(() => ({
     watchlist, allEntries, addToList, removeFromList,
     setStatus, setUserRating, getEntry, isInList,
-  }), [watchlist, allEntries, addToList, removeFromList, setStatus, setUserRating, getEntry, isInList]);
+    hiddenIds, isHidden, hideAnime, unhideAnime,
+  }), [watchlist, allEntries, addToList, removeFromList, setStatus, setUserRating, getEntry, isInList, hiddenIds, isHidden, hideAnime, unhideAnime]);
 
   return (
     <WatchlistContext.Provider value={value}>

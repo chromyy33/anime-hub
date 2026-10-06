@@ -1,20 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Calendar, Star, Play, Sword, Heart, Trophy, BookOpen, ChevronLeft, ChevronRight, LayoutGrid, Zap } from 'lucide-react';
+import { TrendingUp, Calendar, Star, Play, Heart, Trophy, ChevronLeft, ChevronRight, LayoutGrid, Zap } from 'lucide-react';
 import AnimeCard from '../components/AnimeCard';
 import Carousel from '../components/Carousel';
 import { fetchHomeData, fetchAnimeDetails } from '../utils/anilist';
 import { useWatchlist } from '../context/WatchlistContext';
-import WatchlistButton from '../components/WatchlistButton';
 import SEO from '../components/SEO';
 import styles from './Home.module.css';
-
-// ─── Framer-motion variants ────────────────────────────────────────────
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08, ease: [0.4, 0, 0.2, 1] } }),
-};
 
 const sectionVariant = {
   hidden: { opacity: 0, y: 20 },
@@ -100,7 +93,9 @@ function HeroSlider({ slides }) {
                   <span className={styles.heroScore}>
                     <Star size={12} fill="var(--primary)" color="var(--primary)" />
                     <strong className={styles.heroScoreVal}>{anime.score}</strong>
-                    <span className={styles.heroScoreRank}>· #{anime.rank}</span>
+                    {anime.rank && (
+                      <span className={styles.heroScoreRank}>· #{anime.rank}</span>
+                    )}
                   </span>
                 ) : (
                   <span className={styles.heroNoScore}>
@@ -176,7 +171,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const { allEntries, isInList, removeFromList } = useWatchlist();
+  const { allEntries, hiddenIds } = useWatchlist();
 
   // 1. Initial data load
   useEffect(() => {
@@ -234,7 +229,7 @@ export default function Home() {
           ...allEntries.map(a => a.mal_id)
         ]);
 
-        const filtered = rawList.filter(item => !displayedIds.has(item.mal_id)).slice(0, 10);
+        const filtered = rawList.filter(item => !displayedIds.has(item.mal_id) && !hiddenIds.some(h => h.mal_id === item.mal_id)).slice(0, 10);
         setData(prev => ({ ...prev, recommended: filtered, recSource: primary.title }));
       } catch (err) {
         console.error('Failed to load recommendations', err);
@@ -243,7 +238,7 @@ export default function Home() {
       }
     };
     loadRecs();
-  }, [allEntries, data.recommended.length, loading, data.airing, data.upcoming, data.top, data.movies, data.action, data.romance]);
+  }, [allEntries, hiddenIds, data.recommended.length, loading, data.airing, data.upcoming, data.top, data.movies, data.action, data.romance]);
 
 
   if (errorMsg) return (
@@ -264,52 +259,6 @@ export default function Home() {
         : loading && <div className={`skeleton ${styles.heroSkeleton}`} />
       }
 
-      {/* ── YOUR WATCHLIST ── (only if user has items) */}
-      {allEntries.length > 0 && (
-        <section>
-          <SectionHeader Icon={BookOpen} title="Your Watchlist" subtitle={`${allEntries.length} anime saved`} />
-          <Carousel
-            items={allEntries}
-            renderItem={(entry, idx) => (
-              <motion.div
-                key={entry.mal_id} custom={idx} variants={fadeUp} initial="hidden" animate="visible"
-                className={styles.wlCard}
-              >
-                {/* Quick-delete button */}
-                <div className={styles.wlDots}>
-                  <WatchlistButton anime={entry} variant="dots" />
-                </div>
-
-                <Link to={`/anime/${entry.mal_id}`} className={`card-interactive ${styles.wlLink}`}>
-                  <div className="card-img-wrap">
-                    <img src={entry.image} alt={entry.title} className="card-img" loading="lazy" decoding="async" />
-                    {entry.score && (
-                      <span className={`badge ${styles.wlScore}`}>
-                        <Star size={11} fill="var(--primary)" color="var(--primary)" /> {entry.score}
-                      </span>
-                    )}
-                    <div className={styles.wlBadgeRow}>
-                      <WatchlistButton anime={entry} variant="badge" />
-                    </div>
-                  </div>
-                  <div className={styles.wlBody}>
-                    <h3 className={styles.wlTitle}>
-                      {entry.title}
-                    </h3>
-                    <div className={styles.wlRatingRow}>
-                      {entry.userRating
-                        ? <span className={styles.wlRating}><Star size={11} fill="var(--primary)" /> {entry.userRating}/10</span>
-                        : <span className={styles.wlNoRating}>No rating yet</span>
-                      }
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            )}
-          />
-        </section>
-      )}
-      
       {/* ── SMART RECOMMENDATIONS ── */}
       {(loadingRecs || data.recommended.length > 0) && (
         <section>
@@ -323,7 +272,7 @@ export default function Home() {
           ) : (
             <Carousel 
                 items={data.recommended} 
-                renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} 
+                renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} 
             />
           )}
         </section>
@@ -334,7 +283,7 @@ export default function Home() {
         {data.airing.length === 0 && loading ? <SkeletonRow /> : data.airing.length > 0 && (
           <>
             <SectionHeader Icon={TrendingUp} title="Top Airing Right Now" subtitle="The hottest shows currently on air" linkTo="/search?filter=airing" />
-            <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.airing} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>
@@ -344,7 +293,7 @@ export default function Home() {
         {data.movies.length === 0 && loading ? <SkeletonRow /> : data.movies.length > 0 && (
           <>
             <SectionHeader Icon={Star} title="Must-Watch Movies" subtitle="The greatest anime films ever made" />
-            <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.movies} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>
@@ -354,7 +303,7 @@ export default function Home() {
         {data.action.length === 0 && loading ? <SkeletonRow /> : data.action.length > 0 && (
           <>
             <SectionHeader Icon={Zap} title="Action & Adventure" subtitle="High-octane fights and epic journeys" />
-            <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.action} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>
@@ -364,7 +313,7 @@ export default function Home() {
         {data.romance.length === 0 && loading ? <SkeletonRow /> : data.romance.length > 0 && (
           <>
             <SectionHeader Icon={Heart} title="Romance" subtitle="Love stories that will make you feel things" />
-            <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.romance} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>
@@ -374,7 +323,7 @@ export default function Home() {
         {data.upcoming.length === 0 && loading ? <SkeletonRow /> : data.upcoming.length > 0 && (
           <>
             <SectionHeader Icon={Calendar} title="Anticipated Next Season" subtitle="Coming soon — save them to your watchlist" />
-            <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.upcoming} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>
@@ -384,7 +333,7 @@ export default function Home() {
         {data.top.length === 0 && loading ? <SkeletonRow /> : data.top.length > 0 && (
           <>
             <SectionHeader Icon={Trophy} title="All-Time Classics" subtitle="The highest-rated anime of all time" linkTo="/search?filter=top" />
-            <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} className="carousel-item" />} />
+            <Carousel items={data.top} renderItem={(a, i) => <AnimeCard key={a.mal_id} anime={a} index={i} />} />
           </>
         )}
       </section>

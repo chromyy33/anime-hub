@@ -28,6 +28,7 @@ export default function Footer() {
           <h4 className={styles.footerSectionTitle}>Navigation</h4>
           <ul className={styles.footerLinksList}>
             <li><Link to="/" className={styles.footerLink}>Home</Link></li>
+            <li><Link to="/watchlist" className={styles.footerLink}>Watchlist</Link></li>
             <li><Link to="/search" className={styles.footerLink}>Browse Anime</Link></li>
             <li><Link to="/schedule" className={styles.footerLink}>Airing Schedule</Link></li>
           </ul>
