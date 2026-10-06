@@ -156,6 +156,13 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
 }
 
+/* Desktop: exactly 3 columns — wider cards, fewer wraps, calmer rows. */
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .skeletonCard {
   height: 120px;
   border-radius: var(--radius-md);
